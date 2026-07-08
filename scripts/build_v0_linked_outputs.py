@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import sys
@@ -123,14 +124,48 @@ def assert_mapping_gate(summary: dict) -> None:
         raise SystemExit("Mapping gate failed: " + "; ".join(failures))
 
 
+def display_path(path: Path) -> str:
+    """Return a readable path without failing for relative CLI paths."""
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse V0 linked-output build options."""
+    parser = argparse.ArgumentParser(description="Build V0 linked ViClinicalIE outputs.")
+    parser.add_argument("--input-dir", type=Path, default=ROOT / "input", help="Input *.txt directory.")
+    parser.add_argument("--outputs-dir", type=Path, default=ROOT / "outputs" / "v0_linked", help="Output artifact directory.")
+    parser.add_argument("--analysis-dir", type=Path, default=ROOT / "analysis", help="Analysis artifact directory.")
+    parser.add_argument("--reports-dir", type=Path, default=ROOT / "reports", help="Report artifact directory.")
+    parser.add_argument("--resource-dir", type=Path, default=ROOT / "data_resources", help="Data resource directory.")
+    parser.add_argument("--limit", type=int, default=None, help="Process only the first N input files by numeric file id.")
+    parser.add_argument("--only", default=None, help="Comma-separated input file ids to process, e.g. 1,2,3.")
+    parser.add_argument("--skip-mapping-gate", action="store_true", help="Do not fail the run if mapping coverage is below V0 gates.")
+    return parser.parse_args()
+
+
+def select_documents(documents: Sequence[ClinicalDocument], only: str | None, limit: int | None) -> list[ClinicalDocument]:
+    """Select documents by explicit ids or first-N numeric order."""
+    ordered = sorted(documents, key=lambda doc: int(doc.file_id) if doc.file_id.isdigit() else 1 << 30)
+    if only:
+        requested = {item.strip() for item in only.split(",") if item.strip()}
+        ordered = [doc for doc in ordered if doc.file_id in requested]
+    if limit is not None:
+        ordered = ordered[:limit]
+    return ordered
+
+
 def main() -> None:
     configure_stdout()
+    args = parse_args()
 
-    analysis_dir = ROOT / "analysis"
-    outputs_dir = ROOT / "outputs" / "v0_linked"
+    analysis_dir = args.analysis_dir
+    outputs_dir = args.outputs_dir
     output_json_dir = outputs_dir / "output"
-    reports_dir = ROOT / "reports"
-    resource_dir = ROOT / "data_resources"
+    reports_dir = args.reports_dir
+    resource_dir = args.resource_dir
 
     linked_candidates_path = analysis_dir / "span_candidates_v0_linked.jsonl"
     mapping_debug_path = analysis_dir / "mapping_debug_v0.csv"
@@ -139,9 +174,10 @@ def main() -> None:
     validation_report_path = reports_dir / "validation_v0_linked.md"
     mapping_report_path = reports_dir / "mapping_coverage_v0.md"
 
-    documents = parse_documents(load_input_files(str(ROOT / "input")))
+    documents = parse_documents(load_input_files(str(args.input_dir)))
+    documents = select_documents(documents, args.only, args.limit)
     if not documents:
-        raise SystemExit("No input/*.txt files found; cannot build linked V0 outputs.")
+        raise SystemExit("No input/*.txt files found for the requested selection; cannot build linked V0 outputs.")
 
     documents_by_id = {doc.file_id: doc for doc in documents}
     raw_candidates, _ = run_rule_extraction(documents)
@@ -176,22 +212,25 @@ def main() -> None:
 
     summary = mapping_summary(linked_candidates, debug_rows)
     write_mapping_report(summary, validation_report.ok, mapping_report_path)
-    assert_mapping_gate(summary)
+    if not args.skip_mapping_gate:
+        assert_mapping_gate(summary)
 
     print("=" * 70)
     print("V0 Linked Output Build Complete")
     print("=" * 70)
+    print(f"Input dir: {args.input_dir}")
+    print(f"Documents: {len(documents)}")
     print(f"Linked candidates: {len(linked_candidates)}")
     print(f"Validation: {'PASS' if validation_report.ok else 'FAIL'}")
     print(f"Mapping total: {summary['total_mapped']}/{summary['total_mappable']}")
     print(f"Coverage: {summary['coverage']}")
     print(f"Sources: {summary['source_counts']}")
-    print(f"Saved {linked_candidates_path.relative_to(ROOT)}")
-    print(f"Saved {mapping_debug_path.relative_to(ROOT)}")
-    print(f"Saved {mapping_unmapped_path.relative_to(ROOT)}")
-    print(f"Saved {output_json_dir.relative_to(ROOT)}")
-    print(f"Saved {zip_path.relative_to(ROOT)}")
-    print(f"Saved {mapping_report_path.relative_to(ROOT)}")
+    print(f"Saved {display_path(linked_candidates_path)}")
+    print(f"Saved {display_path(mapping_debug_path)}")
+    print(f"Saved {display_path(mapping_unmapped_path)}")
+    print(f"Saved {display_path(output_json_dir)}")
+    print(f"Saved {display_path(zip_path)}")
+    print(f"Saved {display_path(mapping_report_path)}")
 
     if not validation_report.ok:
         raise SystemExit(1)

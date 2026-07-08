@@ -1,0 +1,355 @@
+[
+  {
+    "text": "Bệnh phổi kẽ do sử dụng corticoid liều cao kéo dài",
+    "position": [
+      44,
+      94
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Thở oxy tại nhà",
+    "position": [
+      102,
+      117
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Hội chứng kháng enzym tổng hợp protein",
+    "position": [
+      124,
+      162
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "béo phì",
+    "position": [
+      170,
+      177
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Tăng huyết áp nguyên phát",
+    "position": [
+      184,
+      209
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Sinh thiết nội mạc tử cung gần đây",
+    "position": [
+      247,
+      281
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Corticoid liều cao kéo dài",
+    "position": [
+      317,
+      343
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "Thở oxy tại nhà",
+    "position": [
+      350,
+      365
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Tăng liều bactrim (do bác sĩ chăm sóc chính kê đơn)",
+    "position": [
+      372,
+      423
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "doxycycline (do bác sĩ chăm sóc chính kê đơn)",
+    "position": [
+      430,
+      475
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "Suy giảm miễn dịch do sử dụng corticoid kéo dài",
+    "position": [
+      478,
+      525
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Tình trạng tổn thương vùng âm hộ và mông bên phải ngày càng nặng",
+    "position": [
+      573,
+      637
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tổn thương vùng âm hộ phải lan rộng sang mông phải",
+    "position": [
+      682,
+      732
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "lan rộng sang mông phải",
+    "position": [
+      709,
+      732
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "diễn biến tăng dần trong khoảng 5 ngày trước nhập viện",
+    "position": [
+      734,
+      788
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tổn thương đơn độc vùng âm hộ phải",
+    "position": [
+      839,
+      873
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tăng liều cotrimoxazol",
+    "position": [
+      911,
+      933
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "bổ sung doxycyclin do nghi ngờ viêm mô tế bào",
+    "position": [
+      945,
+      990
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "ban đỏ quanh tổn thương giảm sau điều trị",
+    "position": [
+      1008,
+      1049
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tổn thương tiếp tục tiến triển",
+    "position": [
+      1066,
+      1096
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "nhiều bọng nước",
+    "position": [
+      1108,
+      1123
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "đau nhiều",
+    "position": [
+      1150,
+      1159
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "một số vị trí rỉ dịch vàng đục giống mủ",
+    "position": [
+      1161,
+      1200
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tổn thương vùng âm hộ và mông bên phải",
+    "position": [
+      1344,
+      1382
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Tổn thương cực kỳ đau đớn",
+    "position": [
+      1389,
+      1414
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Tình trạng tổn thương dạng bóng nước ngày càng nặng",
+    "position": [
+      1421,
+      1472
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Lan đến mông bên phải",
+    "position": [
+      1479,
+      1500
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "có dịch giống mủ có màu vàng  chảy ra từ tổn thương",
+    "position": [
+      1507,
+      1558
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Vị trí: âm hộ bên phải, mông bên phải",
+    "position": [
+      1594,
+      1631
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Mức độ nghiêm trọng: cực kỳ đau đớn",
+    "position": [
+      1638,
+      1673
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Thời gian: Tình trạng ngày càng nặng trong 5 ngày",
+    "position": [
+      1680,
+      1729
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Các triệu chứng liên quan: ban đỏ, chảy mủ",
+    "position": [
+      1736,
+      1778
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Viêm mô tế bào",
+    "position": [
+      1932,
+      1946
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "doxycyclinebactrim cho khả năng Viêm mô tế bào",
+    "position": [
+      2235,
+      2281
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Cảm thấy rằng cô ấy đã có cải thiện do những loại thuốc này",
+    "position": [
+      2288,
+      2347
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Nhiễm virus Herpes simplex (HSV)",
+    "position": [
+      2488,
+      2520
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "Bệnh thủy đậu/Zona (do Varicella Zoster Virus)",
+    "position": [
+      2526,
+      2572
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  }
+]

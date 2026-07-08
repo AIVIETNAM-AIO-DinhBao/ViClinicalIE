@@ -1,0 +1,123 @@
+[
+  {
+    "text": "u cơ trơn tử cung",
+    "position": [
+      39,
+      56
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "iron",
+    "position": [
+      104,
+      108
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "đau bụng dưới",
+    "position": [
+      165,
+      178
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "chảy máu nhiều",
+    "position": [
+      182,
+      196
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "siêu âm",
+    "position": [
+      312,
+      319
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "huyết cầu tố",
+    "position": [
+      352,
+      364
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "26.1",
+    "position": [
+      368,
+      372
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Tử cung đo 14,2 x 8,8 x 7,5 cm",
+    "position": [
+      792,
+      822
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "U cơ trơn lớn nhất ở đoạn dưới của tử cung đo 4,1 x 4,8 x 4,1 cm",
+    "position": [
+      829,
+      893
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Dải nội mạc tử cung không thể xác định được",
+    "position": [
+      900,
+      943
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Cả hai buồng trứng đều có vẻ bình thường",
+    "position": [
+      950,
+      990
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Không thấy dịch tự do trong túi cùng Douglas",
+    "position": [
+      997,
+      1041
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Không có giãn bể thận",
+    "position": [
+      1048,
+      1069
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  }
+]

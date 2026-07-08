@@ -1,0 +1,93 @@
+[
+  {
+    "text": "xơ gan do rượu",
+    "position": [
+      61,
+      75
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": [
+      "K70.3"
+    ]
+  },
+  {
+    "text": "sử dụng rượu bia",
+    "position": [
+      121,
+      137
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": [
+      "isHistorical"
+    ]
+  },
+  {
+    "text": "hội chứng não gan",
+    "position": [
+      191,
+      208
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": [
+      "K72.9"
+    ]
+  },
+  {
+    "text": "hội chứng não gan",
+    "position": [
+      270,
+      287
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": [
+      "K72.9"
+    ]
+  },
+  {
+    "text": "hội chứng não gan",
+    "position": [
+      338,
+      355
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": [
+      "K72.9"
+    ]
+  },
+  {
+    "text": "ý thức suy giảm",
+    "position": [
+      368,
+      383
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "hội chứng não gan",
+    "position": [
+      432,
+      449
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": [
+      "K72.9"
+    ]
+  },
+  {
+    "text": "không thể tự chăm sóc bản thân tại nhà",
+    "position": [
+      456,
+      494
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  }
+]

@@ -1,0 +1,138 @@
+[
+  {
+    "text": "Chưa phát hiện bệnh lý bất thường",
+    "position": [
+      25,
+      58
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [
+      "isNegated"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "Đờm",
+    "position": [
+      107,
+      110
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "ho",
+    "position": [
+      113,
+      115
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "đôi khi đau bụng quặn",
+    "position": [
+      118,
+      139
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tiêu chảy",
+    "position": [
+      142,
+      151
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "đôi khi đi ngoài ra máu",
+    "position": [
+      154,
+      177
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "không tăng cân nhiều",
+    "position": [
+      180,
+      200
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": [
+      "isNegated"
+    ]
+  },
+  {
+    "text": "cea (kháng nguyên ung thư phôi)",
+    "position": [
+      247,
+      278
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "4.9",
+    "position": [
+      292,
+      295
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "mri vùng chậu",
+    "position": [
+      325,
+      338
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "siêu âm",
+    "position": [
+      402,
+      409
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "sinh thiết",
+    "position": [
+      553,
+      563
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "khối u trực tràng",
+    "position": [
+      625,
+      642
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "u ác trực tràng",
+    "position": [
+      664,
+      679
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  }
+]

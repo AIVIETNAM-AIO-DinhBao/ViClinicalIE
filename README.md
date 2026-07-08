@@ -51,6 +51,44 @@ Artifacts V0 chính:
 
 Các artifacts này là generated files. `.gitignore` đã cấu hình để bỏ qua các file sinh mới; nếu artifact nào đã được Git track từ trước thì cần bỏ track riêng bằng `git rm --cached` khi muốn.
 
+## Build silver test set (offline eval)
+
+Script `scripts/build_silver_test.py` gọi 1 LLM endpoint theo chuẩn OpenAI-compatible cho mỗi file trong `input/` và ghi ra silver JSON theo đúng schema submission (`text`, `position`, `type`, `assertions`, `candidates`). Chỉ dùng stdlib, không cần cài thêm dependency.
+
+Chạy nhanh với API key + base URL truyền trực tiếp:
+
+```powershell
+python scripts\build_silver_test.py `
+    --base-url https://api.openai.com/v1 `
+    --api-key sk-... `
+    --model gpt-4o-mini
+```
+
+Hoặc dùng env var:
+
+```powershell
+$env:OPENAI_BASE_URL = "https://api.openai.com/v1"
+$env:OPENAI_API_KEY  = "sk-..."
+$env:OPENAI_MODEL    = "gpt-4o-mini"
+python scripts\build_silver_test.py
+```
+
+Các cờ hữu ích:
+
+- `--input-dir input` (mặc định).
+- `--output-dir silver_test\output` (mặc định).
+- `--limit 5` để smoke-test trên 5 file đầu.
+- `--only 1,2,7` để chạy 1 số file cụ thể.
+- `--concurrency 4` số request song song.
+- `--overwrite` để ép sinh lại các file JSON đã tồn tại.
+
+Artifacts:
+
+- `silver_test/output/{file_id}.json`: silver labels từng file.
+- `silver_test/silver_manifest.json`: log số entity, số span đã fix offset, số span bị drop, và các file lỗi.
+
+Script tự sửa lại `position` nếu LLM trả offset sai (miễn là chuỗi `text` xuất hiện trong input), và drop các span không tìm thấy trong input. Với `TÊN_XÉT_NGHIỆM` / `KẾT_QUẢ_XÉT_NGHIỆM`, `assertions` và `candidates` luôn bị bỏ để đúng schema.
+
 ## Chạy test
 
 ```powershell

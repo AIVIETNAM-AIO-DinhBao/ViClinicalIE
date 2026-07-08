@@ -1,0 +1,288 @@
+[
+  {
+    "text": "metoprolol 25mg po bid",
+    "position": [
+      53,
+      75
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": [
+      "308135"
+    ]
+  },
+  {
+    "text": "doxycycline cho viêm tuyến mồ hôi",
+    "position": [
+      82,
+      115
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "atenolol (uống hôm nay)",
+    "position": [
+      122,
+      145
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "Căng thẳng",
+    "position": [
+      226,
+      236
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "đánh trống ngực",
+    "position": [
+      497,
+      512
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "cảm giác đánh trống ngực",
+    "position": [
+      606,
+      630
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Khó thở nhẹ khó thở",
+    "position": [
+      688,
+      707
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "khó thở",
+    "position": [
+      700,
+      707
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "cảm giác thắt chặt ngực vùng trước tim",
+    "position": [
+      714,
+      752
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Tăng đánh trống ngực",
+    "position": [
+      782,
+      802
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Cảm thấy mệt mỏi nhiều khi gắng sức trong tuần qua",
+    "position": [
+      869,
+      919
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Cảm thấy mệt mỏi nhiều hơn sau khi luyện tập thể dục so với mọi ngày",
+    "position": [
+      926,
+      994
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "đánh trống ngực:  còn cảm giác đánh trống ngực khi nhập viện.",
+    "position": [
+      1053,
+      1114
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "khó thở: Nhẹ, liên quan đến đánh trống ngực, liên quan đến khó thở",
+    "position": [
+      1121,
+      1187
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "cảm giác thắt chặt ngực: Trung tâm, khởi phát lúc 17 giờ, kéo dài 20 giây, không có khó chịu vùng ngực khi đến tầng",
+    "position": [
+      1217,
+      1332
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "khó thở: Liên quan đến đánh trống ngực, khởi phát lúc 17 giờ, kéo dài 20 giây",
+    "position": [
+      1339,
+      1416
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "giảm dung nạp gắng sức",
+    "position": [
+      1423,
+      1445
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Không  buồn nôn, hay nôn, đổ mồ hôi",
+    "position": [
+      1454,
+      1489
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Không liên quan đến gắng sức hoặc tư thế",
+    "position": [
+      1496,
+      1536
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Nhịp xoang chiếm ưu thế",
+    "position": [
+      1655,
+      1678
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "ngoại tâm thu nhĩ và ngoại tâm thu thất xuất hiện thường xuyên",
+    "position": [
+      1689,
+      1751
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "metoprolol 25mg po bid",
+    "position": [
+      1772,
+      1794
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "atenololtrong ngày",
+    "position": [
+      1849,
+      1867
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "siêu âm tim qua thành ngực",
+    "position": [
+      1929,
+      1955
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "aspirin 325mg x 1",
+    "position": [
+      2199,
+      2216
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": [
+      "308135"
+    ]
+  },
+  {
+    "text": "x-quang ngực",
+    "position": [
+      2228,
+      2240
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "phân tích nước tiểu không ghi nhận gì bất thường",
+    "position": [
+      2276,
+      2324
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "bệnh nhân không còn cảm giáckhó chịu vùng ngực",
+    "position": [
+      2547,
+      2593
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "chụp x-quang ngực không có gì đáng chú ý",
+    "position": [
+      2693,
+      2733
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "điện tâm đồ là không ghi nhận gì bất thường",
+    "position": [
+      2771,
+      2814
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  }
+]

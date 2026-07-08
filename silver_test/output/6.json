@@ -1,0 +1,58 @@
+[
+  {
+    "text": "Nghẽn tắc và hẹp động mạch cảnh",
+    "position": [
+      50,
+      81
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "siêu âm Doppler động mạch",
+    "position": [
+      235,
+      260
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "hẹp nặng",
+    "position": [
+      357,
+      365
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tỷ số PSV/EDV > 7",
+    "position": [
+      367,
+      384
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "vận tốc dòng chảy tăng rõ",
+    "position": [
+      386,
+      411
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "can thiệp tái thông động mạch cảnh",
+    "position": [
+      467,
+      501
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  }
+]

@@ -1,0 +1,158 @@
+[
+  {
+    "text": "U Sacoit tổn thương chủ yếu tại tim",
+    "position": [
+      48,
+      83
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "ho x1 ngày",
+    "position": [
+      133,
+      143
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "ho ra máu cỡ đồng xu x3 đêm qua",
+    "position": [
+      156,
+      187
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "ho ra máu cỡ đồng xu x3 đêm qua",
+    "position": [
+      156,
+      187
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "ho",
+    "position": [
+      230,
+      232
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "mệt mỏi",
+    "position": [
+      327,
+      334
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "sốt đến 38.8°C",
+    "position": [
+      461,
+      475
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Đờm pha màu hồng",
+    "position": [
+      623,
+      639
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "fever (trở thành sốt đến 38.8°C)",
+    "position": [
+      646,
+      678
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "Đau bụng  âm ỉ  trong tháng qua",
+    "position": [
+      685,
+      716
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "levofloxacin vì nghi ngờ viêm phế quản do viêm phổi mắc phải cộng đồng",
+    "position": [
+      876,
+      946
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "tylenol",
+    "position": [
+      975,
+      982
+    ],
+    "type": "THUỐC",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "công thức máu (cbc)",
+    "position": [
+      1035,
+      1054
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "11.3",
+    "position": [
+      1068,
+      1072
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "chụp x-quang ngực",
+    "position": [
+      1105,
+      1122
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "không phát hiện viêm phổi hoặc phù phổi",
+    "position": [
+      1123,
+      1162
+    ],
+    "type": "KẾT_QUẢ_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "Lấy mẫu cấy máu",
+    "position": [
+      1195,
+      1210
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  }
+]

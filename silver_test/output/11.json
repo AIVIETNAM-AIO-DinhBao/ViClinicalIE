@@ -1,0 +1,128 @@
+[
+  {
+    "text": "tăng huyết áp",
+    "position": [
+      57,
+      70
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "bệnh gút không đặc hiệu",
+    "position": [
+      77,
+      100
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "bệnh thận mạn, không đặc hiệu",
+    "position": [
+      107,
+      136
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "ung thư đại tràng",
+    "position": [
+      143,
+      160
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "béo phì",
+    "position": [
+      167,
+      174
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "xơ gan mất bù",
+    "position": [
+      191,
+      204
+    ],
+    "type": "CHẨN_ĐOÁN",
+    "assertions": [],
+    "candidates": []
+  },
+  {
+    "text": "tăng áp lực tĩnh mạch cửa",
+    "position": [
+      208,
+      233
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "cổ trướng",
+    "position": [
+      235,
+      244
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "tràn dịch màng phổi",
+    "position": [
+      248,
+      267
+    ],
+    "type": "TRIỆU_CHỨNG",
+    "assertions": []
+  },
+  {
+    "text": "liệu pháp lợi tiểu",
+    "position": [
+      308,
+      326
+    ],
+    "type": "THUỐC",
+    "assertions": [
+      "isHistorical"
+    ],
+    "candidates": []
+  },
+  {
+    "text": "chọc dò màng phổi 3L4",
+    "position": [
+      443,
+      464
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "chọc dò dịch ổ bụng 7L",
+    "position": [
+      471,
+      493
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  },
+  {
+    "text": "thủ thuật TIPS",
+    "position": [
+      500,
+      514
+    ],
+    "type": "TÊN_XÉT_NGHIỆM",
+    "assertions": []
+  }
+]

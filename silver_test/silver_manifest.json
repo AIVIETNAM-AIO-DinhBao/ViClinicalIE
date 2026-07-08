@@ -1,0 +1,177 @@
+{
+  "base_url": "https://api.shopaikey.com/v1",
+  "model": "gpt-4o-mini",
+  "input_dir": "repo\\ViClinicalIE\\input",
+  "output_dir": "repo\\ViClinicalIE\\silver_test\\output",
+  "files": [
+    {
+      "file_id": "1",
+      "status": "skipped",
+      "entities": 31,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "2",
+      "status": "skipped",
+      "entities": 8,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "3",
+      "status": "ok",
+      "entities": 30,
+      "offset_fixed": 30,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "4",
+      "status": "skipped",
+      "entities": 24,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "5",
+      "status": "ok",
+      "entities": 20,
+      "offset_fixed": 20,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "6",
+      "status": "skipped",
+      "entities": 6,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "7",
+      "status": "skipped",
+      "entities": 22,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "8",
+      "status": "skipped",
+      "entities": 8,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "9",
+      "status": "skipped",
+      "entities": 13,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "10",
+      "status": "skipped",
+      "entities": 14,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "11",
+      "status": "skipped",
+      "entities": 13,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "12",
+      "status": "skipped",
+      "entities": 17,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "13",
+      "status": "skipped",
+      "entities": 37,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "14",
+      "status": "skipped",
+      "entities": 13,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "15",
+      "status": "skipped",
+      "entities": 4,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "16",
+      "status": "skipped",
+      "entities": 28,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "17",
+      "status": "skipped",
+      "entities": 32,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "18",
+      "status": "skipped",
+      "entities": 8,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "19",
+      "status": "skipped",
+      "entities": 16,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    },
+    {
+      "file_id": "20",
+      "status": "skipped",
+      "entities": 27,
+      "offset_fixed": 0,
+      "dropped": 0,
+      "error": null
+    }
+  ],
+  "totals": {
+    "files": 20,
+    "ok": 2,
+    "skipped": 18,
+    "errors": 0,
+    "entities": 371,
+    "offset_fixed": 50,
+    "dropped": 0
+  }
+}
