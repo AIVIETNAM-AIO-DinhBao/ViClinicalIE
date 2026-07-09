@@ -12,4 +12,6 @@ pytest
 intervaltree
 rank-bm25
 streamlit
+pyarrow
+joblib
 

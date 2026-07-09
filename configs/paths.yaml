@@ -2,6 +2,10 @@ raw_input_dir: data/raw/input
 icd10_csv: data/terminologies/icd10_byt.csv
 rxnorm_rff: data/terminologies/RXNCONSO.RRF
 processed_dir: data/processed
+dictionary_dir: data/dictionaries
+diagnosis_aliases_csv: data/dictionaries/diagnosis_aliases.csv
+drug_aliases_csv: data/dictionaries/drug_aliases.csv
+vector_index_dir: data/processed/vector_indices
 golden_input_dir: data/golden/input
 golden_gold_dir: data/golden/gold
 prediction_dir: outputs/predictions

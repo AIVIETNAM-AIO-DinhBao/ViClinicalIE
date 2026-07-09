@@ -1,6 +1,6 @@
 project:
   name: ViClinicalIE
-  phase: phase_0_foundation
+  phase: phase_1_terminology_indices
 paths_config: paths.yaml
 encoding: utf-8
 seed: 42
@@ -34,4 +34,51 @@ logging:
     - span_mismatch.jsonl
     - no_candidate.jsonl
     - low_confidence.jsonl
+
+icd10:
+  sep: ";"
+  encoding: utf-8-sig
+  skiprows:
+    - 1
+  code_col: "MÃ BỆNH"
+  code_no_dot_col: "MÃ BỆNH KHÔNG DẤU"
+  vi_name_col: "TÊN BỆNH"
+  en_name_col: "DISEASE NAME WHO 2019 (ENGLISH)"
+  vi_guidance_col: "HƯỚNG DẪN MÃ HÓA BỔ SUNG CỦA WHO 2019"
+  en_guidance_col: "ADDITIONAL CODING GUIDANCE WHO 2019 (ENGLISH)"
+  manual_alias_path_key: diagnosis_aliases_csv
+
+rxnorm:
+  sep: "|"
+  encoding: utf-8
+  manual_alias_path_key: drug_aliases_csv
+  keep_lat:
+    - ENG
+  keep_sab:
+    - RXNORM
+  suppress_values_to_drop:
+    - "Y"
+    - "O"
+  tty_keep:
+    - IN
+    - PIN
+    - MIN
+    - BN
+    - SCD
+    - SBD
+    - GPCK
+    - BPCK
+    - SCDC
+    - SCDF
+    - SBDF
+    - SBDC
+
+sparse:
+  analyzer: char_wb
+  ngram_range:
+    - 3
+    - 5
+  lowercase: true
+  min_df: 1
+  max_features: null
 
