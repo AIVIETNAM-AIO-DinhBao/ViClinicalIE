@@ -73,8 +73,11 @@ class FileScore:
 class OfficialMetrics:
     """Approximation of ABOUT.md section #6 scoring.
 
-    Entity identity includes both type and text so a correct text with the wrong
-    type is counted as a different concept, matching the note in ABOUT.md.
+    text_score uses word-level WER on the assembled `text` field per sample
+    (organizer confirmation: "WER(i) là WER của trường text trong sample i").
+    assertions_score / candidates_score use concept identity (type + text) so a
+    correct text with the wrong type is counted as a different concept, matching
+    the note in ABOUT.md.
     """
 
     text_score: float
@@ -250,13 +253,38 @@ def _prf(gold: Counter, pred: Counter) -> PRF:
 
 
 def _concept_id(entity: Dict[str, Any]) -> Tuple[str, str]:
-    """Concept identity for ABOUT.md scoring: type + normalized text."""
+    """Concept identity for diagnostic metrics: type + normalized text."""
     text = " ".join(str(entity.get("text", "")).split())
     return (str(entity.get("type", "")), text)
 
 
-def _edit_distance(a: Sequence[Tuple[str, str]], b: Sequence[Tuple[str, str]]) -> int:
-    """Levenshtein distance between concept identity sequences."""
+def _text_words(entities: Sequence[Dict[str, Any]]) -> List[str]:
+    """Assemble the sample-level word sequence from entity `text` fields.
+
+    ABOUT.md #6 defines WER(i) as the word-level Word Error Rate of the `text`
+    field in sample i (organizer confirmation: "WER(i) là WER của trường text
+    trong sample i"). We therefore concatenate every entity's `text` into one
+    ordered word sequence and score at word granularity, NOT per-concept.
+
+    Assembly assumptions (documented so they can be aligned to the official
+    checker if it differs):
+      - Order: entities sorted by (start, end) position so the sequence follows
+        document reading order. Entities without a valid position sort last.
+      - Tokenization: Unicode-aware whitespace split on each `text` value.
+      - Casing/diacritics: preserved (no lowercasing, no diacritic stripping).
+    """
+    ordered = sorted(
+        entities,
+        key=lambda entity: _position(entity) or (1 << 30, 1 << 30),
+    )
+    words: List[str] = []
+    for entity in ordered:
+        words.extend(str(entity.get("text", "")).split())
+    return words
+
+
+def _edit_distance(a: Sequence[Any], b: Sequence[Any]) -> int:
+    """Levenshtein distance between two token sequences (words or concepts)."""
     previous = list(range(len(b) + 1))
     for i, item_a in enumerate(a, start=1):
         current = [i] + [0] * len(b)
@@ -267,8 +295,13 @@ def _edit_distance(a: Sequence[Tuple[str, str]], b: Sequence[Tuple[str, str]]) -
     return previous[-1]
 
 
-def _wer_score(gold_items: Sequence[Tuple[str, str]], pred_items: Sequence[Tuple[str, str]]) -> float:
-    """Return 1 - WER for one sample, clipped to [0, 1]."""
+def _wer_score(gold_items: Sequence[Any], pred_items: Sequence[Any]) -> float:
+    """Return 1 - WER for one sample, clipped to [0, 1].
+
+    `gold_items` / `pred_items` are the word sequences produced by
+    `_text_words`. WER = edit_distance(gold, pred) / len(gold), so the
+    denominator is the number of gold words in the sample's text field.
+    """
     if not gold_items and not pred_items:
         return 1.0
     if not gold_items:
@@ -332,9 +365,9 @@ def compute_official_metrics(
     for file_id in file_ids:
         gold_entities = gold_by_file.get(file_id, [])
         pred_entities = pred_by_file.get(file_id, [])
-        gold_concepts = [_concept_id(entity) for entity in gold_entities]
-        pred_concepts = [_concept_id(entity) for entity in pred_entities]
-        text_scores.append(_wer_score(gold_concepts, pred_concepts))
+        gold_words = _text_words(gold_entities)
+        pred_words = _text_words(pred_entities)
+        text_scores.append(_wer_score(gold_words, pred_words))
         assertion_scores.append(_jaccard(_assertion_set(gold_entities), _assertion_set(pred_entities)))
 
         weight = _candidate_weight(gold_entities)
