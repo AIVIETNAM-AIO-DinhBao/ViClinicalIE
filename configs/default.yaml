@@ -1,6 +1,6 @@
 project:
   name: ViClinicalIE
-  phase: phase_7_icd10_candidate_generation
+  phase: phase_8_rxnorm_candidate_generation
 paths_config: paths.yaml
 encoding: utf-8
 seed: 42
@@ -210,5 +210,34 @@ icd10_linking:
   normalization:
     expand_common_abbreviations: true
     use_no_diacritics: true
+
+rxnorm_linking:
+  enabled: true
+  drug_types:
+    - THUỐC
+  retrieval:
+    top_k_exact: 20
+    top_k_tfidf: 20
+    top_k_bm25: 20
+  selection:
+    max_candidates: 2
+    min_score_top1: 0.60
+    include_second_if_within: 0.04
+    min_score_additional: 0.75
+    min_retrieval_similarity: 0.55
+    min_sparse_query_chars: 3
+  parser:
+    parse_strength: true
+    parse_route: true
+    parse_frequency: true
+    parse_dose_form: true
+  scoring:
+    exact_full_mention_score: 1.0
+    exact_name_score: 0.90
+    manual_alias_boost: 0.05
+    strength_match_boost: 0.10
+    unit_match_boost: 0.05
+    strength_mismatch_penalty: 0.20
+    no_strength_clinical_drug_penalty: 0.10
 
 

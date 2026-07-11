@@ -1007,6 +1007,116 @@ Recommended next work: **Phase 8 — RxNorm candidate generation for `THUỐC` e
 
 ---
 
+## 8B. Phase 8 — RxNorm candidate generation
+
+**Status:** Implemented and smoke-tested on a small golden subset.
+
+Phase 8 consumes Phase 7/Phase 6 `FinalEntity` objects and attaches RxNorm RxCUI candidates only to drug entities:
+
+```text
+THUỐC → RxNorm candidates
+```
+
+It does **not** create spans, move offsets, change entity type, alter assertions, or link non-drug entities. The Phase 8 smoke script runs both Phase 7 ICD-10 linking and Phase 8 RxNorm linking so the current linked baseline can be checked end-to-end through both terminology wrappers.
+
+Implemented files:
+
+- `src/linking/drug_parser.py`
+  - Adds `ParsedDrug` and `parse_drug_mention(...)`.
+  - Extracts normalized drug name, strength value/unit, route, frequency, dose form, and simple combination marker.
+  - Reuses existing `parse_strength(...)` from `src/linking/rxnorm_index.py`.
+- `src/linking/rxnorm_linker.py`
+  - Main `RxNormLinker` class.
+  - Loads existing Phase 1 RxNorm processed artifacts.
+  - Uses exact alias lookup, ingredient+strength matching, TF-IDF sparse retrieval, and BM25 sparse retrieval.
+  - Applies deterministic constraints/boosts for strength match, unit match, TTY preference, manual brand aliases, and name-only mentions.
+  - Suppresses ingredient-only/no-strength candidates when a strength-bearing mention has matching-strength candidate evidence.
+  - Caches per-mention candidate generation inside one linker instance.
+  - Writes parsed slots and candidate evidence to `provenance["rxnorm_linking"]`.
+- `src/linking/__init__.py`
+  - Lazily exposes `ParsedDrug`, `parse_drug_mention`, and `RxNormLinker`.
+- `tests/test_drug_parser.py`
+- `tests/test_rxnorm_linker.py`
+- `scripts/run_phase8_smoke.py`
+  - Runs preprocess → section detection → extractors → type resolver → assertion detector → ICD10Linker → RxNormLinker.
+  - Validates unchanged offsets, unchanged entity fields, valid ICD codes, valid RxCUIs, and no wrong-type candidates.
+- `configs/default.yaml`
+  - `project.phase: phase_8_rxnorm_candidate_generation`.
+  - Added `rxnorm_linking` config.
+
+Current default Phase 8 candidate policy:
+
+```yaml
+rxnorm_linking:
+  selection:
+    max_candidates: 2
+    min_score_top1: 0.60
+    include_second_if_within: 0.04
+    min_score_additional: 0.75
+    min_retrieval_similarity: 0.55
+    min_sparse_query_chars: 3
+```
+
+Validation commands run in this environment required UTF-8 mode because the active Python executable path contains Vietnamese characters:
+
+```cmd
+set PYTHONUTF8=1
+python -m compileall -q src\linking scripts\run_phase8_smoke.py
+python -m pytest -q tests\test_drug_parser.py tests\test_rxnorm_linker.py
+python -m pytest -q tests\test_candidate_selector.py tests\test_icd10_linker.py tests\test_rxnorm_index.py tests\test_sparse_retriever.py
+python scripts\run_phase1_smoke.py --config configs\default.yaml
+python scripts\run_phase6_smoke.py --config configs\default.yaml --max-files 5 --sample-limit 5
+python scripts\run_phase7_smoke.py --config configs\default.yaml --max-files 2 --sample-limit 5
+python scripts\run_phase8_smoke.py --config configs\default.yaml --max-files 2 --sample-limit 10
+```
+
+Observed validation results:
+
+```text
+9 passed in 2.04s
+18 passed, 4 warnings in 2.24s
+
+Phase 1 smoke checks passed.
+
+Phase 6 smoke checks completed.
+files_checked: 5
+offset_error_count: 0
+
+Phase 7 smoke checks completed.
+files_checked: 2
+offset_error_count: 0
+mutation_error_count: 0
+invalid_candidate_error_count: 0
+non_diagnosis_candidate_error_count: 0
+
+Phase 8 smoke checks completed.
+files_checked: 2
+chunks_checked: 74
+span_candidates: 64
+final_entities: 57
+diagnosis_entities: 17
+diagnosis_with_icd_candidates: 1
+drug_entities: 4
+drug_with_rxnorm_candidates: 4
+offset_error_count: 0
+mutation_error_count: 0
+invalid_icd_candidate_error_count: 0
+invalid_rxnorm_candidate_error_count: 0
+wrong_type_candidate_error_count: 0
+```
+
+Known Phase 8 caveats:
+
+- Candidate quality is still deterministic and not calibrated against official/golden metrics.
+- Phase 8 can only link drug spans produced by the existing extractor/type resolver; false-positive drug spans such as broad `caffeine` mentions may still receive exact RxNorm candidates.
+- Some strength-bearing mentions may still select ingredient-level candidates when the available RxNorm aliases/retrieval evidence does not surface the clinical-drug candidate strongly enough; this should be revisited in Phase 9 reranking and Phase 12 evaluation.
+- Combination drug handling is conservative and only detects obvious separators/markers in the baseline parser.
+- Existing sparse vectorizer artifacts were built with scikit-learn 1.8.0 and loaded under 1.9.0 in this environment, producing `InconsistentVersionWarning`; Phase 1/7/8 smoke checks still passed.
+
+Recommended next work: **Phase 9 — deterministic candidate reranking/calibration**, followed by Phase 10 merge/postprocess.
+
+---
+
 ## 9. Practical continuation checklist
 
 For a future session, start here:
