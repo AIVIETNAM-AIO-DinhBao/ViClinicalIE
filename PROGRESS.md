@@ -909,6 +909,104 @@ After Phase 6, continue in this order:
 
 ---
 
+## 8A. Phase 7 — ICD-10 candidate generation
+
+**Status:** Implemented and smoke-tested on a small golden subset.
+
+Phase 7 consumes Phase 6 asserted `FinalEntity` objects and attaches ICD-10 candidates only to diagnosis entities:
+
+```text
+CHẨN_ĐOÁN → ICD-10 candidates
+```
+
+It does **not** create spans, move offsets, change entity type, alter assertions, or link non-diagnosis entities.
+
+Implemented files:
+
+- `src/linking/candidate_selector.py`
+  - Conservative candidate-selection utility.
+  - Deduplicates by code.
+  - Keeps top-1 only above threshold.
+  - Adds extra candidates only for near-ties or high-confidence candidates.
+- `src/linking/icd10_linker.py`
+  - Main `ICD10Linker` class.
+  - Loads existing Phase 1 ICD-10 processed artifacts.
+  - Uses exact alias lookup, TF-IDF sparse retrieval, and BM25 sparse retrieval.
+  - Normalizes diagnosis query variants and expands a small high-precision abbreviation map (`GERD`, `COPD`, `UTI`, `MI`).
+  - Filters sparse candidates by query/alias lexical similarity to reduce generic noisy matches.
+  - Caches per-mention candidate generation inside one linker instance.
+  - Writes selected and top-candidate evidence to `provenance["icd10_linking"]`.
+- `src/linking/__init__.py`
+  - Exports selector utilities and lazily exposes `ICD10Linker` to avoid forcing pandas imports for selector-only tests.
+- `tests/test_candidate_selector.py`
+- `tests/test_icd10_linker.py`
+- `scripts/run_phase7_smoke.py`
+  - Runs preprocess → section detection → extractors → type resolver → assertion detector → ICD-10 linker.
+  - Validates unchanged offsets, unchanged entity fields, valid ICD codes, and no non-diagnosis candidates.
+- `configs/default.yaml`
+  - `project.phase: phase_7_icd10_candidate_generation`.
+  - Added `icd10_linking` config.
+
+Current default Phase 7 candidate policy:
+
+```yaml
+icd10_linking:
+  selection:
+    max_candidates: 3
+    min_score_top1: 0.65
+    include_second_if_within: 0.05
+    min_score_additional: 0.70
+    min_retrieval_similarity: 0.55
+    min_sparse_query_tokens: 2
+    min_sparse_query_chars: 6
+```
+
+Validation commands run in this environment required UTF-8 mode because the active Python executable path contains Vietnamese characters:
+
+```cmd
+set PYTHONUTF8=1
+python -m compileall -q src\linking scripts\run_phase7_smoke.py
+python -m pytest -q tests\test_candidate_selector.py tests\test_icd10_linker.py
+python scripts\run_phase1_smoke.py --config configs\default.yaml
+python scripts\run_phase6_smoke.py --config configs\default.yaml --max-files 5 --sample-limit 5
+python scripts\run_phase7_smoke.py --config configs\default.yaml --max-files 2 --sample-limit 10
+```
+
+Observed validation results:
+
+```text
+10 passed in 2.54s
+
+Phase 1 smoke checks passed.
+
+Phase 6 smoke checks completed.
+files_checked: 5
+offset_error_count: 0
+
+Phase 7 smoke checks completed.
+files_checked: 2
+chunks_checked: 74
+span_candidates: 64
+final_entities: 57
+diagnosis_entities: 17
+diagnosis_with_candidates: 1
+offset_error_count: 0
+mutation_error_count: 0
+invalid_candidate_error_count: 0
+non_diagnosis_candidate_error_count: 0
+```
+
+Known Phase 7 caveats:
+
+- Candidate quality is still a deterministic sparse baseline and is not calibrated against official metrics.
+- Some noisy diagnosis spans from Phase 5 can still receive ICD candidates when lexical overlap is strong enough; Phase 10 merge/postprocess and Phase 12 evaluation should handle further calibration.
+- A 5-file Phase 7 smoke attempt exceeded the 30-second tool timeout in the current environment, although the 2-file smoke passed all integrity checks.
+- Existing sparse vectorizer artifacts were built with scikit-learn 1.8.0 and loaded under 1.9.0 in this environment, producing `InconsistentVersionWarning`; Phase 1 smoke still passed.
+
+Recommended next work: **Phase 8 — RxNorm candidate generation for `THUỐC` entities**, following the same linker wrapper pattern and conservative candidate selector.
+
+---
+
 ## 9. Practical continuation checklist
 
 For a future session, start here:

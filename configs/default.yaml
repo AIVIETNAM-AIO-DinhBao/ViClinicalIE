@@ -1,6 +1,6 @@
 project:
   name: ViClinicalIE
-  phase: phase_6_assertion_detection
+  phase: phase_7_icd10_candidate_generation
 paths_config: paths.yaml
 encoding: utf-8
 seed: 42
@@ -185,5 +185,30 @@ assertion_detection:
       isHistorical: 0.30
     PRE_ADMISSION_MEDICATION:
       isHistorical: 0.35
+
+icd10_linking:
+  enabled: true
+  diagnosis_types:
+    - CHẨN_ĐOÁN
+  retrieval:
+    top_k_exact: 20
+    top_k_tfidf: 20
+    top_k_bm25: 20
+  selection:
+    max_candidates: 3
+    min_score_top1: 0.65
+    include_second_if_within: 0.05
+    min_score_additional: 0.70
+    min_retrieval_similarity: 0.55
+    min_sparse_query_tokens: 2
+    min_sparse_query_chars: 6
+  scoring:
+    exact_weight: 0.40
+    tfidf_weight: 0.30
+    bm25_weight: 0.25
+    context_weight: 0.05
+  normalization:
+    expand_common_abbreviations: true
+    use_no_diacritics: true
 
 
