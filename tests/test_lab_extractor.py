@@ -38,3 +38,13 @@ def test_lab_extractor_emits_qualitative_result() -> None:
     candidates = extractor.extract(ExtractionContext(raw, output.views, output.chunks))
 
     assert any(cand.text == "bình thường" and cand.raw_type == "KẾT_QUẢ_XÉT_NGHIỆM" for cand in candidates)
+
+
+def test_lab_extractor_emits_full_qualitative_result_phrase() -> None:
+    raw = "phân tích nước tiểu không ghi nhận bất thường"
+    output = preprocess_text(raw)
+    extractor = LabExtractor(lab_rows=[{"alias": "phân tích nước tiểu", "canonical": "phân tích nước tiểu"}])
+
+    candidates = extractor.extract(ExtractionContext(raw, output.views, output.chunks))
+
+    assert any(cand.text == raw and cand.raw_type == "KẾT_QUẢ_XÉT_NGHIỆM" for cand in candidates)

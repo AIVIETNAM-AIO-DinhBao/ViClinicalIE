@@ -9,6 +9,10 @@ from src.linking.terminology_normalizer import normalize_for_lookup
 SYMPTOM_HEADS: tuple[str, ...] = (
     "đau",
     "khó thở",
+    "đánh trống ngực",
+    "cảm giác đánh trống ngực",
+    "cảm giác thắt chặt ngực",
+    "ý thức suy giảm",
     "ho",
     "sốt",
     "buồn nôn",
@@ -134,10 +138,15 @@ def has_symptom_head(text: str, features: dict) -> bool:
 
 
 def has_disease_head(text: str, features: dict) -> bool:
+    text_norm = normalize_for_lookup(text)
+    if text_norm in {"bệnh", "bệnh nhân", "người bệnh", "bệnh hiện tại", "tình trạng"}:
+        return False
+    if text_norm.startswith("bệnh nhân ") or text_norm.startswith("người bệnh "):
+        return False
     rule = str(features.get("rule", ""))
     if rule == "disease_head":
         return True
-    return starts_with_any(normalize_for_lookup(text), DISEASE_HEADS)
+    return starts_with_any(text_norm, DISEASE_HEADS)
 
 
 def starts_with_any(text_norm: str, heads: tuple[str, ...]) -> bool:

@@ -15,5 +15,6 @@ def test_imaging_extractor_catches_common_imaging_tests() -> None:
 
     assert "chụp x-quang ngực" in texts
     assert "chụp ct sọ não" in texts
+    assert any(cand.text.lower() == "chụp x-quang ngực bình thường" and cand.raw_type == "KẾT_QUẢ_XÉT_NGHIỆM" for cand in candidates)
     for cand in candidates:
         assert raw[cand.start : cand.end] == cand.text

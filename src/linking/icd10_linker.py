@@ -47,6 +47,7 @@ class ICD10Linker:
         self.top_k_tfidf = int(retrieval_cfg.get("top_k_tfidf", 20))
         self.top_k_bm25 = int(retrieval_cfg.get("top_k_bm25", 20))
         self.selection_config = CandidateSelectionConfig.from_dict(self.config.get("selection", {}))
+        self.manual_overrides = _normalize_manual_overrides(self.config.get("manual_overrides", {}))
         selection_cfg = self.config.get("selection", {}) if isinstance(self.config.get("selection", {}), dict) else {}
         self.min_retrieval_similarity = float(selection_cfg.get("min_retrieval_similarity", 0.55))
         self.min_sparse_query_tokens = int(selection_cfg.get("min_sparse_query_tokens", 2))
@@ -98,6 +99,7 @@ class ICD10Linker:
         candidates: list[MappingCandidate] = []
         query_variants = normalize_diagnosis_queries(mention, self.config)
         for query in query_variants:
+            candidates.extend(self._manual_override_candidates(query))
             candidates.extend(self._exact_alias_candidates(query))
             if self._allow_sparse_query(query):
                 candidates.extend(self._tfidf_candidates(query))
@@ -105,6 +107,25 @@ class ICD10Linker:
         merged = self._merge_candidates(candidates)
         self._candidate_cache[cache_key] = merged
         return list(merged)
+
+    def _manual_override_candidates(self, query: str) -> list[MappingCandidate]:
+        codes = self.manual_overrides.get(normalize_for_lookup(query), [])
+        output: list[MappingCandidate] = []
+        for code in codes:
+            if code not in self.valid_codes:
+                continue
+            canonical = self._canonical_by_code.get(code, {})
+            output.append(
+                MappingCandidate(
+                    code=code,
+                    name=str(canonical.get("canonical_name_vi") or canonical.get("canonical_name_en") or code),
+                    terminology="ICD10",
+                    lexical_score=1.0,
+                    final_score=0.99,
+                    metadata={"retriever": "manual_override", "match_type": "manual_override", "alias": query},
+                )
+            )
+        return output
 
     def _allow_sparse_query(self, query: str) -> bool:
         normalized = normalize_for_lookup(query)
@@ -285,3 +306,18 @@ def _alias_query_similarity(query: str, alias: str) -> float:
     # Favor candidates whose alias is lexically close to the mention. This
     # prevents high BM25 scores from short/generic overlaps such as "bệnh nhân".
     return max(0.0, min(1.0, 0.80 * f1 + 0.20 * length_ratio))
+
+
+def _normalize_manual_overrides(value: Any) -> dict[str, list[str]]:
+    if not isinstance(value, dict):
+        return {}
+    output: dict[str, list[str]] = {}
+    for alias, codes in value.items():
+        if isinstance(codes, str):
+            code_list = [codes]
+        elif isinstance(codes, list | tuple | set):
+            code_list = [str(code) for code in codes]
+        else:
+            continue
+        output[normalize_for_lookup(str(alias))] = [code.strip() for code in code_list if code.strip()]
+    return output

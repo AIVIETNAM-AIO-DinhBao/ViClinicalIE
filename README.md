@@ -2,7 +2,7 @@
 
 Rule-first clinical information extraction and normalization system for the Viettel AI Race clinical text task.
 
-Current repository status: **Phase 12.5 minimal inference + trial submission complete** — the project can run the modular pipeline through:
+Current repository status: **Phase 9 metric-guided calibration complete on top of Phase 12.5 inference** — the project can run the modular pipeline through:
 
 ```text
 preprocess + offset mapping
@@ -16,9 +16,10 @@ preprocess + offset mapping
 → final JSON formatting + schema/offset validation
 → golden evaluation and error reports
 → reusable inference CLI + BTC-format output.zip trial package
+→ deterministic Phase 9 rule/candidate/assertion calibration
 ```
 
-It is **not yet optimized for score**. A schema-valid 100-file trial `output.zip` can be generated; the next major work is Phase 9 metric-guided calibration/reranking.
+It is still **not a final model-based solution**, but the rule-first baseline has now been tuned with golden metrics and can generate a schema-valid 100-file Phase 9 submission zip.
 
 ## Setup
 
@@ -46,7 +47,7 @@ Run tests:
 python -m pytest -q
 ```
 
-For the current Phase 12 baseline, useful targeted checks are:
+For the current Phase 9 baseline, useful targeted checks are:
 
 ```cmd
 set PYTHONUTF8=1
@@ -58,6 +59,9 @@ python scripts\run_phase11_smoke.py --config configs\default.yaml --max-files 2 
 python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir data\golden\gold --report-dir outputs\reports\phase12_gold_self_eval --expected-count 20
 python scripts\run_inference.py --config configs\default.yaml --input-dir data\raw\input --output-dir outputs\predictions\submission_trial\output --report-dir outputs\reports\submission_trial_validation --expected-count 100 --disable-sparse-retrieval
 python scripts\make_submission_zip.py --pred-dir outputs\predictions\submission_trial\output --zip-path outputs\submission\output.zip --expected-count 100 --overwrite
+python scripts\run_inference.py --config configs\default.yaml --input-dir data\golden\input --output-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_validation --expected-count 20 --disable-sparse-retrieval
+python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_eval --expected-count 20
+python scripts\analyze_phase9_errors.py --report-dir outputs\reports\phase9_eval --top-k 12
 ```
 
 `PYTHONUTF8=1` is recommended on Windows when paths/usernames contain Vietnamese characters.
@@ -87,6 +91,7 @@ Root-level source files are intentionally left in place.
 - **Phase 11:** Final JSON formatter plus schema/file/directory validator and Phase 11 smoke writer.
 - **Phase 12:** Golden evaluator with exact/relaxed matching, per-file/per-type metrics, assertion/candidate metrics, and JSONL/CSV/Markdown error reports.
 - **Phase 12.5:** Minimal reusable inference pipeline/CLI and BTC-format `output.zip` creator for 100-file trial submission.
+- **Phase 9:** Metric-guided deterministic calibration for extractor precision, qualitative lab/imaging results, negation scope, and ICD candidate selection.
 
 ## Ghi chú nhanh bằng tiếng Việt
 
@@ -110,9 +115,9 @@ Section giúp pipeline hiểu **ngữ cảnh** của một span, nhưng **không
 
 Vì vậy, section hiện được dùng như **feature/prior** cho extractor, type resolver và assertion detector. Quyết định cuối vẫn dựa trên mention-level context: cue phủ định, cue tiền sử, người trải nghiệm triệu chứng, thuốc đang dùng hay thuốc mới được chỉ định, v.v.
 
-### Hiện tại đã done tới Phase 12.5 chưa?
+### Hiện tại đã done Phase 9 chưa?
 
-**Có, nhưng cần hiểu đúng phạm vi:** repo đã done **Phase 12.5 minimal inference/trial submission**, đã tạo được output 100 files đúng schema, nhưng chưa tune điểm.
+**Có:** repo đã done **Phase 9 deterministic metric-guided calibration** sau Phase 12.5. Vẫn chưa dùng model NER/ML thật, nhưng baseline rule-first đã được tune bằng golden20 evaluator.
 
 Đã có thể chạy chuỗi module:
 
@@ -129,9 +134,10 @@ raw text
 → format JSON + validate schema/offset
 → evaluate against golden + write error reports
 → run inference trên 100 raw files + package output.zip
+→ tune deterministic rules/candidates/assertions bằng Phase 9
 ```
 
-Phase 12.5 đã tạo được `outputs/submission/output.zip` để nộp thử. Đây là trial baseline trước tuning; chất lượng score vẫn cần Phase 9 cải thiện.
+Phase 9 đã tạo được `outputs/submission/output_phase9.zip` để nộp thử. Đây là bản tốt hơn `outputs/submission/output.zip` baseline Phase 12.5.
 
 ### Kết quả re-check mới nhất
 
@@ -192,27 +198,56 @@ last_entries: ['output/96.json', 'output/97.json', 'output/98.json', 'output/99.
 all_under_output: True
 ```
 
-Known issue vẫn còn: quality baseline hiện còn thấp và nên dùng Phase 12 reports để tune có kiểm soát trong Phase 9.
+Known issue vẫn còn: quality baseline vẫn chưa cao; nên dùng `outputs/reports/phase9_eval` và UI Phase 13 để tune tiếp có kiểm soát.
+
+Phase 9 re-check mới nhất:
+
+```text
+Golden20 evaluation:
+pred_entities: 455
+exact_f1: 0.2303       # baseline cũ 0.1788
+relaxed_f1: 0.4145     # baseline cũ 0.3642
+assertion_exact_match_rate: 0.6588
+candidate_hit_rate: 0.8000
+span_mismatch_count: 76
+type_mismatch_count: 36
+candidate_mismatch_count: 1
+
+100-file Phase 9 validation:
+prediction_files_checked: 100
+entities_checked: 1867
+error_count: 0
+warning_count: 0
+offset_error_count: 0
+schema_error_count: 0
+invalid_assertion_count: 0
+wrong_type_candidate_count: 0
+
+output_phase9.zip:
+entry_count: 100
+all_under_output: True
+```
 
 ## Not Yet Implemented
 
-- Candidate reranking/calibration beyond current deterministic sparse/linker scoring.
 - Streamlit validation UI.
+- NER/dense/cross-encoder model components.
 - Source-package rebuild instructions for BTC source-code review.
 
 ## Recommended Next Work
 
-The practical next milestone is to improve the now-runnable trial baseline:
+The practical next milestone is UI/error review and optional next calibration pass:
 
 ```text
-Phase 9/10 calibration and reranking refinements
-→ Streamlit UI
+Phase 13 Streamlit UI
+→ optional Phase 9.1 targeted calibration
+→ Phase 14/15 model-assisted components
 ```
 
 Roadmap chi tiết hơn:
 
-1. **Phase 9/10/4/6/7/8 calibration:** tune dựa trên Phase 12 evaluator thay vì cảm tính.
-2. **Phase 13 — Streamlit UI:** xem raw text, highlight prediction/gold, debug section/span/candidate/assertion.
+1. **Phase 13 — Streamlit UI:** xem raw text, highlight prediction/gold, debug section/span/candidate/assertion.
+2. **Optional Phase 9.1 calibration:** tune tiếp dựa trên UI + `outputs/reports/phase9_eval`.
 3. **Phase 14/15 — NER + dense/reranker:** chỉ nên làm sau khi rule baseline và evaluator ổn.
 4. **Phase 16/17 — Final hardening + packaging:** chạy lại inference đủ 100, validate, zip, và README rebuild cho BTC.
 

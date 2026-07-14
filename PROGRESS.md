@@ -1,7 +1,7 @@
 # PROGRESS: ViClinicalIE implementation state
 
 **Last updated:** 2026-07-13  
-**Current implementation phase:** Phase 12.5 complete — minimal inference CLI and BTC-format trial submission zip implemented after Phase 12 evaluator  
+**Current implementation phase:** Phase 9 complete — metric-guided deterministic calibration implemented on top of Phase 12.5 inference/submission baseline  
 **Reference docs:** `ABOUT.md`, `Solution Design.md`, `Implementation Plan.md`
 
 ---
@@ -63,8 +63,8 @@ Implemented foundation files include:
     - `VALID_ENTITY_TYPES`
     - `VALID_ASSERTIONS`
 - `configs/default.yaml`
-  - Current `project.phase` remains `phase_8_rxnorm_candidate_generation`; later cleanup can rename this metadata to the current implementation milestone.
-  - Includes ICD/RxNorm parsing config, sparse retrieval config, preprocess/chunking config, section detection config, Phase 4 extractor config, Phase 5 type-resolution config, Phase 6 assertion-detection config, Phase 7 ICD-10 linking config, Phase 8 RxNorm linking config, Phase 10 postprocess config, Phase 11 output/validation config, and Phase 12 evaluation config.
+  - Current `project.phase` is `phase_9_metric_guided_calibration`.
+  - Includes ICD/RxNorm parsing config, sparse retrieval config, preprocess/chunking config, section detection config, Phase 4 extractor config, Phase 5 type-resolution config, Phase 6 assertion-detection config, Phase 7 ICD-10 linking config, Phase 8 RxNorm linking config, Phase 9 calibration config, Phase 10 postprocess config, Phase 11 output/validation config, and Phase 12 evaluation config.
 - `configs/paths.yaml`
   - Canonical paths for raw input, terminology files, processed indices, golden data, predictions, reports, and submissions.
 
@@ -925,31 +925,54 @@ README.md
 PROGRESS.md
 ```
 
-Before starting major tuning work, consider:
+Phase 9 added/modified:
+
+```text
+configs/default.yaml
+scripts/analyze_phase9_errors.py
+src/assertion/negation.py
+src/extractors/problem_extractor.py
+src/extractors/lab_extractor.py
+src/extractors/imaging_extractor.py
+src/linking/icd10_linker.py
+src/postprocess/cleanup.py
+src/type_resolution/features.py
+tests/test_assertion.py
+tests/test_problem_extractor.py
+tests/test_lab_extractor.py
+tests/test_imaging_extractor.py
+tests/test_icd10_linker.py
+tests/test_postprocess_cleanup.py
+README.md
+PROGRESS.md
+```
+
+Before starting major UI/model work, consider:
 
 1. Install dependencies and run full `pytest`.
-2. Review/commit Phase 4–8, Phase 10, Phase 11, Phase 12, and Phase 12.5 changes.
+2. Review/commit Phase 4–8, Phase 9, Phase 10, Phase 11, Phase 12, and Phase 12.5 changes.
 3. Keep `README.md` and `PROGRESS.md` aligned with `configs/default.yaml`.
 
 ---
 
-## 7. Recommended next work: metric-guided tuning path
+## 7. Recommended next work: review UI and optional next calibration path
 
-Phase 7/8 linker wrappers, Phase 10 postprocess, Phase 11 formatting/validation, Phase 12 evaluation, and Phase 12.5 trial inference/submission are now implemented. The next practical target should be using Phase 12 reports for metric-guided tuning.
+Phase 7/8 linker wrappers, Phase 9 calibration, Phase 10 postprocess, Phase 11 formatting/validation, Phase 12 evaluation, and Phase 12.5 trial inference/submission are now implemented. The next practical target should be a review UI and/or a small Phase 9.1 calibration pass using the new Phase 9 reports.
 
 Recommended next implementation path:
 
 ```text
-Phase 9 deterministic reranking/calibration refinements
-→ Phase 13 Streamlit UI
+Phase 13 Streamlit UI
+→ optional Phase 9.1 targeted calibration
+→ Phase 14/15 model-assisted components
 ```
 
 Why this order:
 
-1. Current Phase 12.5 can produce a valid 100-file trial `output.zip`, so tuning work can use the same inference path that will be submitted.
-2. Candidate reranking and threshold tuning can now be driven by Phase 12 error reports instead of manual guessing.
-3. Phase 10 reduced obvious duplicates/overlaps/false positives conservatively; remaining quality work should be metric-guided.
-4. The next tuning passes should use exact/relaxed metrics plus FP/FN/span/type/assertion/candidate reports.
+1. Current Phase 9 can produce a valid 100-file `output_phase9.zip`, so later review uses the same inference path that will be submitted.
+2. Phase 9 already reduced obvious deterministic errors; remaining issues are easier to inspect visually.
+3. Candidate/assertion/span tuning can continue from `outputs/reports/phase9_eval` instead of manual guessing.
+4. The next tuning passes should use exact/relaxed metrics plus FP/FN/span/type/assertion/candidate reports and UI highlights.
 
 Important caveats for the next work:
 
@@ -962,12 +985,12 @@ Important caveats for the next work:
 
 ## 8. Later phases after trial inference baseline
 
-After Phase 12.5, continue in this order:
+After Phase 9, continue in this order:
 
-1. **Phase 9 — Reranking/calibration and rule tuning**
-   - Start deterministic; dense/cross-encoder later if needed.
-2. **Phase 13 — Streamlit UI**
+1. **Phase 13 — Streamlit UI**
    - Highlight raw text, predictions, gold, and diffs.
+2. **Optional Phase 9.1 — targeted deterministic calibration**
+   - Use UI + `phase9_eval` reports to tune residual high-value errors.
 3. **Phase 14/15 — NER and dense retrieval/reranker**
    - Only after rule baseline and evaluator are stable.
 4. **Phase 16/17 — Final hardening and packaging**
@@ -1695,7 +1718,132 @@ Known Phase 12.5 caveats:
 
 - The generated `output.zip` is a valid-format **trial baseline**, not a tuned final submission.
 - Full 100-file generation was performed with `--disable-sparse-retrieval` for speed/stability in the current tool timeout environment. Later final runs can compare with sparse retrieval enabled if runtime permits.
-- Phase 9 should now use Phase 12 evaluator reports to improve extraction, type, assertion, postprocess, ICD, and RxNorm quality.
+- Phase 9 subsequently improved this trial baseline and produced `outputs/submission/output_phase9.zip`.
+
+---
+
+## 8G. Phase 9 — Metric-guided deterministic calibration
+
+**Status:** Implemented and validated on golden20 plus all 100 public raw input files.
+
+Phase 9 used the Phase 12 evaluator and Phase 12.5 inference path to tune deterministic baseline quality without adding ML/NER models.
+
+Implemented changes:
+
+- Added `scripts/analyze_phase9_errors.py` to summarize top FP/FN/type/span/assertion/candidate error patterns from evaluator JSONL files.
+- Tuned `src/extractors/problem_extractor.py`:
+  - filters generic patient/problem spans such as `bệnh`, `bệnh nhân`, `bệnh hiện tại`, `yếu tố nguy cơ`;
+  - adds symptom heads for `đánh trống ngực`, `cảm giác đánh trống ngực`, `cảm giác thắt chặt ngực`, and `ý thức suy giảm`;
+  - stops tails at common temporal/reporting phrases such as `theo`, `kể từ`, `sau khi`, `trong khoảng`, `vào`.
+- Tuned `src/extractors/lab_extractor.py` and `src/extractors/imaging_extractor.py`:
+  - emits full qualitative result spans for patterns like `không ghi nhận bất thường`, `bình thường`, `cho thấy ...`, `gợi ý ...`;
+  - tightens imaging tails so scheduled/context words do not become part of test names.
+- Tuned `src/postprocess/cleanup.py`:
+  - drops generic problem phrases;
+  - trims subject/verb triggers such as `bệnh nhân xuất hiện ...` when the remainder starts with a valid symptom/diagnosis head.
+- Tuned `src/assertion/negation.py`:
+  - adds max pre/post negation distances;
+  - prevents negation from leaking across comma + new subject clauses.
+- Tuned ICD candidate selection in `configs/default.yaml` and `src/linking/icd10_linker.py`:
+  - defaults to higher precision top-1 candidate selection;
+  - supports `manual_overrides` for high-confidence missing aliases;
+  - added overrides for `hội chứng não gan -> K72.9` and GERD variants -> `K21.9`.
+- Added/updated unit tests for the above behavior.
+
+Commands run on 2026-07-13:
+
+```cmd
+python scripts\run_inference.py --config configs\default.yaml --input-dir data\golden\input --output-dir outputs\predictions\phase9_baseline_golden20 --report-dir outputs\reports\phase9_baseline_validation --expected-count 20 --disable-sparse-retrieval --sample-limit 0
+python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir outputs\predictions\phase9_baseline_golden20 --report-dir outputs\reports\phase9_baseline_eval --expected-count 20
+
+python scripts\run_inference.py --config configs\default.yaml --input-dir data\golden\input --output-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_validation --expected-count 20 --disable-sparse-retrieval --sample-limit 0
+python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_eval --expected-count 20
+python scripts\analyze_phase9_errors.py --report-dir outputs\reports\phase9_eval --top-k 8
+python -m pytest -q
+
+REM Full 100 files were generated in 20-file batches with --disable-sparse-retrieval and --keep-existing-output.
+
+python scripts\run_validate.py --config configs\default.yaml --input-dir data\raw\input --pred-dir outputs\predictions\submission_phase9\output --report-dir outputs\reports\submission_phase9_validation --expected-count 100 --sample-limit 0
+python scripts\make_submission_zip.py --pred-dir outputs\predictions\submission_phase9\output --zip-path outputs\submission\output_phase9.zip --expected-count 100 --overwrite
+```
+
+Golden20 metric comparison:
+
+```text
+Phase 9 baseline before tuning:
+pred_entities: 525
+exact_f1: 0.1788
+relaxed_f1: 0.3642
+assertion_exact_match_rate: 0.5658
+candidate_hit_rate: 0.4000
+span_mismatch_count: 83
+type_mismatch_count: 42
+assertion_mismatch_count: 33
+candidate_mismatch_count: 4
+
+Phase 9 after tuning:
+pred_entities: 455
+exact_tp/fp/fn: 95 / 360 / 275
+exact_precision: 0.2088
+exact_recall: 0.2568
+exact_f1: 0.2303
+relaxed_precision: 0.3758
+relaxed_recall: 0.4622
+relaxed_f1: 0.4145
+assertion_exact_match_rate: 0.6588
+candidate_hit_rate: 0.8000
+span_mismatch_count: 76
+type_mismatch_count: 36
+assertion_mismatch_count: 29
+candidate_mismatch_count: 1
+```
+
+Full test suite and 100-file validation:
+
+```text
+155 passed in 2.85s
+
+Prediction validation completed.
+input_files_checked: 100
+prediction_files_checked: 100
+entities_checked: 1867
+missing_prediction_count: 0
+extra_prediction_count: 0
+error_count: 0
+warning_count: 0
+offset_error_count: 0
+schema_error_count: 0
+invalid_type_count: 0
+invalid_assertion_count: 0
+wrong_type_candidate_count: 0
+json_parse_error_count: 0
+
+output_phase9.zip:
+zip_exists: True
+zip_size: 65635
+entry_count: 100
+first_entries: ['output/1.json', 'output/2.json', 'output/3.json', 'output/4.json', 'output/5.json']
+last_entries: ['output/96.json', 'output/97.json', 'output/98.json', 'output/99.json', 'output/100.json']
+all_under_output: True
+```
+
+Phase 9 artifacts:
+
+```text
+outputs/predictions/phase9_golden20/
+outputs/reports/phase9_validation/
+outputs/reports/phase9_eval/
+outputs/predictions/submission_phase9/output/
+outputs/reports/submission_phase9_validation/
+outputs/submission/output_phase9.zip
+```
+
+Known Phase 9 caveats:
+
+- The system is still rule-first/dictionary/regex-based; no NER model has been added.
+- Remaining errors are dominated by symptom FP/FN and span-boundary issues, especially repeated short symptom heads and lab/result boundary variants.
+- Candidate metrics improved on golden20, but RxNorm gold has at least one suspicious aspirin→amlodipine-like mismatch; avoid overfitting that single case unless confirmed by competition feedback.
+- Full 100-file Phase 9 submission was generated with `--disable-sparse-retrieval` for stable runtime in the current environment.
 
 ---
 
@@ -1722,9 +1870,12 @@ python scripts\run_phase11_smoke.py --config configs\default.yaml --max-files 2 
 python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir data\golden\gold --report-dir outputs\reports\phase12_gold_self_eval --expected-count 20
 python scripts\run_inference.py --config configs\default.yaml --input-dir data\raw\input --output-dir outputs\predictions\submission_trial\output --report-dir outputs\reports\submission_trial_validation --expected-count 100 --disable-sparse-retrieval
 python scripts\make_submission_zip.py --pred-dir outputs\predictions\submission_trial\output --zip-path outputs\submission\output.zip --expected-count 100 --overwrite
+python scripts\run_inference.py --config configs\default.yaml --input-dir data\golden\input --output-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_validation --expected-count 20 --disable-sparse-retrieval
+python scripts\run_evaluate.py --config configs\default.yaml --input-dir data\golden\input --gold-dir data\golden\gold --pred-dir outputs\predictions\phase9_golden20 --report-dir outputs\reports\phase9_eval --expected-count 20
+python scripts\analyze_phase9_errors.py --report-dir outputs\reports\phase9_eval --top-k 8
 ```
 
-Then proceed with Phase 9 metric-guided tuning using Phase 12 reports.
+Then proceed with Phase 13 Streamlit UI or optional Phase 9.1 targeted tuning using Phase 9 reports.
 
 Before writing new extractor code, keep these invariants visible:
 
@@ -1739,7 +1890,7 @@ Every resolver/postprocess component should preserve enough provenance to debug 
 
 ## 10. Summary
 
-The repository currently has a solid foundation through Phase 12.5:
+The repository currently has a solid foundation through Phase 9 on top of Phase 12.5:
 
 - canonical config/data layout;
 - ICD/RxNorm terminology parsing and sparse retrieval artifacts;
@@ -1764,5 +1915,9 @@ The repository currently has a solid foundation through Phase 12.5:
 - Phase 12.5 minimal inference CLI and BTC-format `output.zip` creator;
 - 100-file trial predictions validated with zero schema/offset/type/assertion/candidate-placement errors;
 - `outputs/submission/output.zip` contains exactly `output/1.json` through `output/100.json`.
+- Phase 9 deterministic calibration using golden20 evaluator reports;
+- Phase 9 golden20 exact F1 improved from 0.1788 to 0.2303 and relaxed F1 from 0.3642 to 0.4145;
+- Phase 9 100-file predictions validated with zero schema/offset/type/assertion/candidate-placement errors;
+- `outputs/submission/output_phase9.zip` contains exactly `output/1.json` through `output/100.json`.
 
-The next major milestone is Phase 9 metric-guided tuning: use Phase 12 reports to tune extraction, assertion, postprocess, and linker policies using the 20-file golden dataset, then regenerate the 100-file trial zip.
+The next major milestone is Phase 13 Streamlit UI for visual review/debugging, followed by optional Phase 9.1 targeted calibration or Phase 14/15 model-assisted components.

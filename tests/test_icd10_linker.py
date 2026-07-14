@@ -13,6 +13,7 @@ def _write_minimal_processed(tmp_path: Path) -> None:
         [
             {"code": "I10", "canonical_name_vi": "Tăng huyết áp vô căn", "canonical_name_en": "Essential hypertension"},
             {"code": "J44.9", "canonical_name_vi": "Bệnh phổi tắc nghẽn mạn tính", "canonical_name_en": "COPD"},
+            {"code": "K72.9", "canonical_name_vi": "Suy gan, không xác định", "canonical_name_en": "Hepatic failure, unspecified"},
         ]
     )
     aliases = pd.DataFrame(
@@ -102,3 +103,21 @@ def test_icd10_linker_returns_no_candidate_for_unknown_text(tmp_path) -> None:
     linked = linker.link_entity(entity, raw_text="abcxyz không phải bệnh")
 
     assert linked.candidates == []
+
+
+def test_icd10_linker_manual_override_can_supply_missing_alias(tmp_path) -> None:
+    _write_minimal_processed(tmp_path)
+    linker = ICD10Linker(
+        tmp_path,
+        {
+            "manual_overrides": {"hội chứng não gan": ["K72.9"]},
+            "retrieval": {"top_k_exact": 0, "top_k_tfidf": 0, "top_k_bm25": 0},
+            "selection": {"min_score_top1": 0.65},
+        },
+    )
+    entity = FinalEntity(text="hội chứng não gan", start=0, end=17, type="CHẨN_ĐOÁN")
+
+    linked = linker.link_entity(entity, raw_text="hội chứng não gan")
+
+    assert linked.candidates == ["K72.9"]
+    assert linked.provenance["icd10_linking"]["chosen"][0]["source"] == "manual_override"

@@ -31,3 +31,16 @@ def test_problem_extractor_catches_diagnosis_like_mentions() -> None:
 
     assert ("viêm túi mật cấp", "CHẨN_ĐOÁN") in texts_by_type
     assert ("rung nhĩ kèm đáp ứng thất nhanh", "CHẨN_ĐOÁN") in texts_by_type
+
+
+def test_problem_extractor_filters_generic_patient_problem_spans() -> None:
+    raw = "Bệnh nhân xuất hiện cảm giác đánh trống ngực. Bệnh hiện tại ổn."
+    output = preprocess_text(raw)
+    extractor = ProblemExtractor()
+
+    candidates = extractor.extract(ExtractionContext(raw, output.views, output.chunks))
+    texts = {cand.text for cand in candidates}
+
+    assert "Bệnh nhân xuất hiện cảm giác đánh trống ngực" not in texts
+    assert "Bệnh hiện tại" not in texts
+    assert any("đánh trống ngực" in text for text in texts)

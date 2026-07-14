@@ -36,6 +36,12 @@ def test_negation_list_scope() -> None:
         assert "isNegated" in _assertions(raw, text, "TRIỆU_CHỨNG")
 
 
+def test_distant_negation_does_not_leak_to_later_entity() -> None:
+    raw = "Không ghi nhận bất thường khi khám ban đầu, bệnh nhân được theo dõi sát trong nhiều giờ và sau đó đau bụng."
+
+    assert "isNegated" not in _assertions(raw, "đau bụng", "TRIỆU_CHỨNG")
+
+
 def test_pseudo_negation_guard() -> None:
     raw = "Không loại trừ viêm phổi."
 

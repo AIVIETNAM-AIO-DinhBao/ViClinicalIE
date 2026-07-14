@@ -57,6 +57,27 @@ def test_drop_caffeine_in_coffee_context_without_dose() -> None:
     assert reason == "drug_without_dose_in_food_or_substance_context"
 
 
+def test_drop_generic_problem_phrase() -> None:
+    raw = "Bệnh nhân đau bụng."
+    entity = _entity(raw, "Bệnh nhân", "CHẨN_ĐOÁN")
+
+    should_drop, reason = should_drop_entity(entity, raw, {})
+
+    assert should_drop
+    assert reason == "generic_problem_phrase"
+
+
+def test_trim_subject_verb_trigger_to_symptom_head() -> None:
+    raw = "Bệnh nhân xuất hiện đau ngực."
+    entity = _entity(raw, "Bệnh nhân xuất hiện đau ngực", "TRIỆU_CHỨNG")
+
+    trimmed, decision = trim_entity(entity, raw, {})
+
+    assert decision is not None
+    assert trimmed.text == "đau ngực"
+    assert raw[trimmed.start : trimmed.end] == trimmed.text
+
+
 def test_keep_aspirin_with_dose() -> None:
     raw_text = "Dùng aspirin 81mg mỗi ngày."
     entity = _entity(

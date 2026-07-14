@@ -9,13 +9,34 @@ from src.linking.terminology_normalizer import normalize_for_lookup
 from src.postprocess.models import PostprocessDecision
 from src.postprocess.policies import dedupe_stable, is_assertable, is_linked_type, ordered_valid_assertions
 from src.postprocess.span_utils import entity_payload, with_span
-from src.type_resolution.features import DISEASE_HEADS
+from src.type_resolution.features import DISEASE_HEADS, SYMPTOM_HEADS
 
 
 NEGATION_CUES = ("không có", "không thấy", "không ghi nhận", "chưa phát hiện", "phủ nhận", "không")
 DIAGNOSIS_TRIGGERS = ("lo ngại", "nghi ngờ", "chẩn đoán", "phát hiện", "cho thấy", "gợi ý")
+SUBJECT_VERB_TRIGGERS = (
+    "bệnh nhân xuất hiện",
+    "bệnh nhân có",
+    "bệnh nhân còn",
+    "người bệnh xuất hiện",
+    "người bệnh có",
+    "xuất hiện",
+    "ghi nhận",
+    "cảm thấy",
+)
 TRIM_CHARS = " \t\r\n-•*:;,。."
 QUALITATIVE_RESULTS = {"bình thường", "âm tính", "dương tính"}
+GENERIC_ENTITY_TEXTS = {
+    "bệnh",
+    "bệnh nhân",
+    "người bệnh",
+    "bệnh hiện tại",
+    "yếu tố nguy cơ",
+    "yếu tố nguy cơ liên quan",
+    "các triệu chứng hiện tại",
+    "triệu chứng hiện tại",
+    "tình trạng",
+}
 STRONG_MED_CONTEXT_CUES = (
     "thuốc",
     "dùng",
@@ -55,6 +76,11 @@ def trim_entity(entity: FinalEntity, raw_text: str, config: dict[str, Any]) -> t
         if new_start != start:
             start = new_start
 
+    if str(entity.type) in {"TRIỆU_CHỨNG", "CHẨN_ĐOÁN"}:
+        new_start = _trim_subject_verb_trigger(raw_text, start, end, str(entity.type))
+        if new_start != start:
+            start = new_start
+
     start, end = _trim_outer(raw_text, start, end)
     if start == entity.start and end == entity.end and assertions == entity.assertions:
         return entity, None
@@ -70,6 +96,8 @@ def trim_entity(entity: FinalEntity, raw_text: str, config: dict[str, Any]) -> t
 
 
 def should_drop_entity(entity: FinalEntity, raw_text: str, config: dict[str, Any]) -> tuple[bool, str]:
+    if _is_generic_problem_entity(entity):
+        return True, "generic_problem_phrase"
     if _is_non_lab_qualitative_result(entity):
         return True, "non_lab_qualitative_result"
     if _is_food_context_drug_false_positive(entity, raw_text, config):
@@ -128,6 +156,35 @@ def _trim_diagnosis_trigger(raw_text: str, start: int, end: int) -> int:
             if any(remainder_norm == head or remainder_norm.startswith(f"{head} ") for head in DISEASE_HEADS):
                 return cursor
     return start
+
+
+def _trim_subject_verb_trigger(raw_text: str, start: int, end: int, entity_type: str) -> int:
+    text_norm = normalize_for_lookup(raw_text[start:end])
+    for trigger in sorted(SUBJECT_VERB_TRIGGERS, key=len, reverse=True):
+        trigger_norm = normalize_for_lookup(trigger)
+        if not text_norm.startswith(f"{trigger_norm} "):
+            continue
+        cursor = start + len(trigger)
+        while cursor < end and raw_text[cursor] in TRIM_CHARS:
+            cursor += 1
+        remainder_norm = normalize_for_lookup(raw_text[cursor:end])
+        heads = SYMPTOM_HEADS if entity_type == "TRIỆU_CHỨNG" else DISEASE_HEADS
+        if any(remainder_norm == head or remainder_norm.startswith(f"{head} ") for head in heads):
+            return cursor
+    return start
+
+
+def _is_generic_problem_entity(entity: FinalEntity) -> bool:
+    if str(entity.type) not in {"TRIỆU_CHỨNG", "CHẨN_ĐOÁN"}:
+        return False
+    text_norm = normalize_for_lookup(entity.text)
+    if text_norm in GENERIC_ENTITY_TEXTS:
+        return True
+    if text_norm.startswith("bệnh nhân ") or text_norm.startswith("người bệnh "):
+        return True
+    if text_norm.startswith("bệnh ") and len(text_norm.split()) <= 2:
+        return True
+    return False
 
 
 def _is_non_lab_qualitative_result(entity: FinalEntity) -> bool:

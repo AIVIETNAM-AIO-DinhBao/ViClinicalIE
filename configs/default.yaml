@@ -1,6 +1,6 @@
 project:
   name: ViClinicalIE
-  phase: phase_8_rxnorm_candidate_generation
+  phase: phase_9_metric_guided_calibration
 paths_config: paths.yaml
 encoding: utf-8
 seed: 42
@@ -174,6 +174,8 @@ assertion_detection:
     - THUỐC
   window_chars_left: 160
   window_chars_right: 160
+  max_negation_pre_distance: 90
+  max_negation_post_distance: 48
   thresholds:
     isNegated: 0.55
     isHistorical: 0.60
@@ -195,13 +197,22 @@ icd10_linking:
     top_k_tfidf: 20
     top_k_bm25: 20
   selection:
-    max_candidates: 3
+    max_candidates: 1
     min_score_top1: 0.65
-    include_second_if_within: 0.05
+    include_second_if_within: 0.02
     min_score_additional: 0.70
     min_retrieval_similarity: 0.55
     min_sparse_query_tokens: 2
     min_sparse_query_chars: 6
+  manual_overrides:
+    hội chứng não gan:
+      - K72.9
+    bệnh trào ngược dạ dày thực quản:
+      - K21.9
+    bệnh trào ngược dạ dày- thực quản:
+      - K21.9
+    trào ngược dạ dày thực quản:
+      - K21.9
   scoring:
     exact_weight: 0.40
     tfidf_weight: 0.30
@@ -220,9 +231,9 @@ rxnorm_linking:
     top_k_tfidf: 20
     top_k_bm25: 20
   selection:
-    max_candidates: 2
+    max_candidates: 1
     min_score_top1: 0.60
-    include_second_if_within: 0.04
+    include_second_if_within: 0.02
     min_score_additional: 0.75
     min_retrieval_similarity: 0.55
     min_sparse_query_chars: 3
