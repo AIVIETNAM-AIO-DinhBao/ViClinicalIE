@@ -26,3 +26,6 @@ models/
 # Large extracted RxNorm distribution. Keep only the canonical copied file under
 # data/terminologies/RXNCONSO.RRF in git.
 RxNorm_full_prescribe_current/
+
+# Local reference/teaching repository
+training-repo/
