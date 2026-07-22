@@ -1,0 +1,40 @@
+extends: ner3/base.yaml
+paths_config: paths.yaml
+
+project:
+  phase: v2_ner4_deterministic
+
+section_detection:
+  patterns_config: section_patterns.yaml
+
+entity_rules_config: entity_rules.yaml
+
+assertion_detection:
+  rules_config: assertion_rules.yaml
+
+ner4:
+  enabled: true
+  mode: deterministic
+  boundary:
+    enabled: true
+    trim_whitespace: true
+    trim_punctuation: true
+    # Verified development gold sometimes keeps these prefixes/full qualitative
+    # result spans. Keep the raw-safe operations available but disabled in the
+    # promoted profile until the annotation contract is migrated consistently.
+    trim_negation_cues: false
+    trim_diagnosis_cues: false
+    trim_subject_cues: false
+    split_test_result: false
+  cluster:
+    enabled: true
+    linkage: complete
+    high_overlap_iou: 0.50
+  type_policy:
+    enabled: true
+    source_reliability_by_type:
+      THUỐC: [drug_rule, gliner, dictionary]
+      TÊN_XÉT_NGHIỆM: [lab_rule, imaging_rule, gliner, dictionary]
+      KẾT_QUẢ_XÉT_NGHIỆM: [lab_result_rule, gliner]
+      TRIỆU_CHỨNG: [gliner, problem_rule, dictionary]
+      CHẨN_ĐOÁN: [gliner, problem_rule, dictionary]

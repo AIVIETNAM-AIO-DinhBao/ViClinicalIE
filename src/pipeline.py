@@ -15,6 +15,7 @@ from src.linking.icd10_linker import ICD10Linker
 from src.linking.rxnorm_linker import RxNormLinker
 from src.postprocess import PostprocessReport, Postprocessor
 from src.ner.evidence_adapter import normalize_candidates
+from src.ner.deterministic_fusion import resolve_ner4_trace
 from src.ner.simple_fusion import resolve_replay, resolve_replay_trace
 from src.preprocess.chunker import preprocess_text
 from src.section.section_detector import detect_sections, load_section_patterns
@@ -85,7 +86,11 @@ class ClinicalIEPipeline:
         asserted = self.assertion_detector.apply(resolved, raw_text)
         icd_linked = self.icd_linker.link_entities(asserted, raw_text=raw_text)
         rx_linked = self.rx_linker.link_entities(icd_linked, raw_text=raw_text)
-        postprocessed = self.postprocessor.process(rx_linked, raw_text=raw_text)
+        postprocessed = (
+            self.postprocessor.process_finalized_ner(rx_linked, raw_text=raw_text)
+            if self._ner4_config() is not None
+            else self.postprocessor.process(rx_linked, raw_text=raw_text)
+        )
         records = self.formatter.format_entities(postprocessed.entities)
 
         entity_counts = Counter(str(entity.type) for entity in postprocessed.entities)
@@ -128,6 +133,21 @@ class ClinicalIEPipeline:
 
     def extract_ner_trace(self, raw_text: str) -> NERExtractionTrace:
         chunks, candidates = self._collect_ner_candidates(raw_text)
+        ner4_cfg = self._ner4_config()
+        if ner4_cfg is not None:
+            replay = resolve_ner4_trace(
+                candidates, raw_text, mode="G",
+                resolver_config=self.raw_config.get("type_resolution", {}),
+                boundary_config=ner4_cfg.get("boundary", {}),
+                cluster_config=ner4_cfg.get("cluster", {}),
+                type_config=ner4_cfg.get("type_policy", {}),
+            )
+            return NERExtractionTrace(
+                raw_text=raw_text, chunks=chunks, candidates=candidates, entities=replay.entities,
+                resolver_conflicts=list(replay.conflicts),
+                unresolved_candidates=list(replay.unresolved),
+                duplicate_exact_span_count=0,
+            )
         mode = self._ner3_mode()
         if mode is not None:
             replay = resolve_replay_trace(
@@ -175,6 +195,15 @@ class ClinicalIEPipeline:
     def resolve_candidates(
         self, raw_text: str, candidates: list[SpanCandidate], *, mode: str | None = None,
     ) -> list[FinalEntity]:
+        ner4_cfg = self._ner4_config()
+        if ner4_cfg is not None:
+            return resolve_ner4_trace(
+                candidates, raw_text, mode="G",
+                resolver_config=self.raw_config.get("type_resolution", {}),
+                boundary_config=ner4_cfg.get("boundary", {}),
+                cluster_config=ner4_cfg.get("cluster", {}),
+                type_config=ner4_cfg.get("type_policy", {}),
+            ).entities
         if mode is not None:
             return resolve_replay(
                 candidates, raw_text, mode=mode,
@@ -202,6 +231,27 @@ class ClinicalIEPipeline:
             entities_by_type=dict(sorted(counts.items())), postprocess_report=postprocessed.report,
         )
 
+    def process_finalized_ner_end_to_end(self, raw_text: str, entities: list[FinalEntity], *, file_id: str = "") -> PipelineResult:
+        """Run frozen downstream components without re-editing NER boundaries."""
+
+        if self.assertion_detector is None or self.icd_linker is None or self.rx_linker is None:
+            raise RuntimeError("Downstream pipeline components are not initialized")
+        frozen = [(item.start, item.end, item.text, str(item.type)) for item in entities]
+        asserted = self.assertion_detector.apply(entities, raw_text)
+        icd_linked = self.icd_linker.link_entities(asserted, raw_text=raw_text)
+        rx_linked = self.rx_linker.link_entities(icd_linked, raw_text=raw_text)
+        postprocessed = self.postprocessor.process_finalized_ner(rx_linked, raw_text=raw_text)
+        after = [(item.start, item.end, item.text, str(item.type)) for item in postprocessed.entities]
+        if sorted(frozen) != sorted(after):
+            raise ValueError("Frozen NER span/type changed in downstream pipeline")
+        records = self.formatter.format_entities(postprocessed.entities)
+        counts = Counter(str(entity.type) for entity in postprocessed.entities)
+        return PipelineResult(
+            file_id, raw_text, postprocessed.entities, records,
+            counters={"entities_after_ner": len(entities), "records": len(records)},
+            entities_by_type=dict(sorted(counts.items())), postprocess_report=postprocessed.report,
+        )
+
     def _extract_and_resolve(self, raw_text: str) -> tuple[list[FinalEntity], list[Any], list[SpanCandidate]]:
         chunks, candidates = self._collect_ner_candidates(raw_text)
         mode = self._ner3_mode()
@@ -217,6 +267,15 @@ class ClinicalIEPipeline:
             return None
         mode = ner3_cfg.get("mode")
         return str(mode) if mode is not None else None
+
+    def _ner4_config(self) -> dict[str, Any] | None:
+        ner4_cfg = self.raw_config.get("ner4", {})
+        if not isinstance(ner4_cfg, dict) or not bool(ner4_cfg.get("enabled", False)):
+            return None
+        mode = str(ner4_cfg.get("mode", "deterministic"))
+        if mode != "deterministic":
+            raise ValueError(f"Unsupported NER-4 mode: {mode}")
+        return ner4_cfg
 
     def process_file(self, path: str | Path) -> PipelineResult:
         file_path = Path(path)

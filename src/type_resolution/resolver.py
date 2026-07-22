@@ -125,6 +125,10 @@ class TypeResolver:
         source = candidate.source
         raw_type = candidate.raw_type
 
+        ner4_type = candidate.features.get("ner4_selected_type")
+        if ner4_type in VALID_ENTITY_TYPES:
+            return self._resolved(candidate, str(ner4_type), "ner4_type_policy", features)
+
         if features.has_lab_result_evidence:
             return self._resolved(candidate, "KẾT_QUẢ_XÉT_NGHIỆM", "lab_result_rule", features)
         if features.has_lab_evidence or features.has_imaging_evidence:

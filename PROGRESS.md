@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-07-22
 
-**Current implementation phase:** V2 NER-3 — V1 precision-expert integration implementation and one-note smoke validation
+**Current implementation phase:** V2 NER-4 — boundary cleanup and deterministic fusion implementation
 
-**Reference docs:** `ABOUT.md`, `Solution_Design_V2.md`, `Implementation_Plan_V2.md`, `NER01_IMPLEMENTATION.md`, `NER2_IMPLEMENTATION.md`, `NER3_IMPLEMENTATION.md`
+**Reference docs:** `ABOUT.md`, `Solution_Design_V2.md`, `Implementation_Plan_V2.md`, `NER01_IMPLEMENTATION.md`, `NER2_IMPLEMENTATION.md`, `NER3_IMPLEMENTATION.md`, `NER4_IMPLEMENTATION.md`
 
 ---
 
@@ -2674,3 +2674,27 @@ duplicate errors. B remained the strongest system (exact F1 0.2810; end-to-end
 beat A or B and had lower exact F1 than C, so no NER-3 hybrid was promoted.
 Calibration and lockbox remain unopened. C and D are retained only as NER-4
 diagnostic parents.
+
+---
+
+## 8L. V2 NER-4 — deterministic fusion
+
+**Status:** Completed and promoted on all 12 development notes. Calibration and
+lockbox remain unopened.
+
+The final profile is `configs/ner4.yaml`. Complete-link evidence clustering and
+deterministic type policy improved exact F1 from 0.256186 to 0.258389, relaxed F1
+from 0.404658 to 0.439597, and official-like score from 0.138422 to 0.194986.
+The run had zero raw-offset errors, zero exact duplicates, and density 0.8112
+relative to NER-3 D. Per-type regression remained within the frozen budget.
+
+Raw-safe cue trimming and structural test/result splitting remain implemented
+but are disabled in the selected profile because verified gold currently keeps
+some cue/full-result spans. Full drug formulation is selected from the V1 drug
+anchor. `ClinicalIEPipeline` routes through NER-4 when the single feature flag is
+enabled and preserves finalized spans/types through downstream processing.
+
+The one-use experiment harness/configs/traces were removed after the decision.
+The retained artifacts are the production modules, `configs/ner4.yaml`, two test
+files, `NER4_IMPLEMENTATION.md`, and `outputs/reports/ner4_final/summary.json`.
+Focused tests passed 12/12 and the full repository suite passed 268/268.

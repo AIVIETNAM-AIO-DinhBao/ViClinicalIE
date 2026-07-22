@@ -1,0 +1,47 @@
+{
+  "schema_version": "ner4-final-v1",
+  "decision": "promote",
+  "development_files": 12,
+  "selected_profile": "configs/ner4.yaml",
+  "selected_components": [
+    "complete_link_evidence_clustering",
+    "deterministic_type_policy",
+    "full_drug_formulation_anchor",
+    "frozen_downstream_ner_handoff"
+  ],
+  "disabled_pending_gold_migration": [
+    "trim_negation_cues",
+    "trim_diagnosis_cues",
+    "trim_subject_cues",
+    "split_test_result"
+  ],
+  "baseline": {
+    "system": "NER3_D",
+    "exact_f1": 0.256186,
+    "relaxed_f1": 0.404658,
+    "official_like_score": 0.1384223079890049
+  },
+  "selected": {
+    "system": "NER4_G_CONSERVATIVE_BOUNDARY",
+    "exact_f1": 0.258389,
+    "relaxed_f1": 0.439597,
+    "official_like_score": 0.19498581587888086,
+    "density_ratio_to_baseline": 0.8112033195020747,
+    "offset_errors": 0,
+    "duplicate_exact_spans": 0
+  },
+  "delta": {
+    "exact_f1": 0.002203,
+    "relaxed_f1": 0.034939,
+    "official_like_score": 0.05656350788987596
+  },
+  "per_type_exact_f1_delta": {
+    "CHẨN_ĐOÁN": 0.025901,
+    "KẾT_QUẢ_XÉT_NGHIỆM": 0.002177,
+    "THUỐC": 0.0,
+    "TRIỆU_CHỨNG": -0.002115,
+    "TÊN_XÉT_NGHIỆM": 0.0
+  },
+  "calibration_opened": false,
+  "lockbox_opened": false
+}

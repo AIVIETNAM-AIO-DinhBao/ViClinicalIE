@@ -38,6 +38,30 @@ class Postprocessor:
         report.output_count = len(working)
         return PostprocessResult(working, report)
 
+    def process_finalized_ner(self, entities: list[FinalEntity], raw_text: str) -> PostprocessResult:
+        """Validate and clean fields without changing finalized NER spans/types.
+
+        NER-4 freezes boundary and type before assertion/linking.  The legacy
+        postprocessor remains unchanged for V1/NER-2/NER-3, while this path
+        deliberately skips trimming, dropping, and overlap resolution.
+        """
+
+        report = PostprocessReport(input_count=len(entities))
+        working = self._validate_initial(entities, raw_text, report)
+        keys = [(entity.start, entity.end, str(entity.type)) for entity in working]
+        duplicate_count = len(keys) - len(set(keys))
+        if duplicate_count:
+            raise ValueError(f"Finalized NER contains {duplicate_count} exact duplicates")
+        frozen = [(entity.start, entity.end, entity.text, str(entity.type)) for entity in working]
+        working = self._cleanup_candidates_assertions(working, report)
+        working = sorted(working, key=lambda item: (item.start, item.end, type_priority(str(item.type), self.config), item.text))
+        after = [(entity.start, entity.end, entity.text, str(entity.type)) for entity in working]
+        if sorted(frozen) != sorted(after):
+            raise ValueError("Finalized NER span/type changed during postprocess")
+        self._validate_final(working, raw_text, report)
+        report.output_count = len(working)
+        return PostprocessResult(working, report)
+
     def _validate_initial(self, entities: list[FinalEntity], raw_text: str, report: PostprocessReport) -> list[FinalEntity]:
         output: list[FinalEntity] = []
         keep_invalid = bool(self.validation_config.get("keep_invalid_entities", False))
