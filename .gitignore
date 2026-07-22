@@ -15,6 +15,7 @@ outputs/predictions/*
 outputs/submission/*
 outputs/cache/*
 outputs/baselines/*
+outputs/experiments/*
 !outputs/reports/.gitkeep
 !outputs/predictions/.gitkeep
 !outputs/submission/.gitkeep
@@ -31,3 +32,7 @@ RxNorm_full_prescribe_current/
 
 # Local reference/teaching repository
 training-repo/
+
+# Materialized NER-2 runtime configs are reproducible from the tracked matrix.
+configs/.ner2_run_*.yaml
+configs/ner2/coordinate_search/

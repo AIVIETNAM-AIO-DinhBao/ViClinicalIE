@@ -1,0 +1,56 @@
+extends: ../gliner_zero_shot.yaml
+project:
+  phase: v2_ner2_selected_zero_shot_frozen
+paths_config: ../paths.yaml
+entity_rules_config: ../entity_rules.yaml
+section_detection:
+  patterns_config: ../section_patterns.yaml
+assertion_detection:
+  rules_config: ../assertion_rules.yaml
+extractors:
+  gliner:
+    enabled: true
+    required: true
+    model_name_or_path: urchade/gliner_multi-v2.1
+    model_revision: 443d26d654e0324125a96bebd8e796c14ff2efe6
+    local_files_only: true
+    device: auto
+    pass_name: full_five_type
+    threshold:
+      default: 0.3
+      CHẨN_ĐOÁN: 0.3
+      KẾT_QUẢ_XÉT_NGHIỆM: 0.3
+      THUỐC: 0.3
+      TRIỆU_CHỨNG: 0.3
+      TÊN_XÉT_NGHIỆM: 0.3
+    label_map:
+      symptom: TRIỆU_CHỨNG
+      disease or diagnosis: CHẨN_ĐOÁN
+      medication or drug: THUỐC
+      medical test or lab name: TÊN_XÉT_NGHIỆM
+      test result or measurement value: KẾT_QUẢ_XÉT_NGHIỆM
+    windowing:
+      max_tokens: 320
+      overlap_tokens: 0
+      tokenizer_name_or_path: microsoft/mdeberta-v3-base
+      tokenizer_revision: a0484667b22365f84929a935b5e50a51f71f159d
+      strategy: section_no_overlap
+    cache:
+      enabled: true
+      directory: outputs/cache/gliner
+    lazy_load: true
+    proposal_cache_mode: raw_floor
+    proposal_threshold: 0.15
+    passes:
+    - name: full_five_type
+      label_map:
+        symptom: TRIỆU_CHỨNG
+        disease or diagnosis: CHẨN_ĐOÁN
+        medication or drug: THUỐC
+        medical test or lab name: TÊN_XÉT_NGHIỆM
+        test result or measurement value: KẾT_QUẢ_XÉT_NGHIỆM
+ner2_freeze:
+  run_id: pass_full
+  selection_policy_hash: 81b1eac321895d9de253b3bc05979f1080d9faa6e77ff8906203b960f8c968df
+  run_manifest_hash: a99ed11b56eb76495cc3e3c5b1ce0d2c6b50c2fa5896986c13ef698d8d2b77aa
+  lockbox_seen: false

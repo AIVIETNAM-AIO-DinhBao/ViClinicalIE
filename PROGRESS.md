@@ -2461,6 +2461,51 @@ Known limitations and next gate:
 - Next work package is NER-2: controlled label, windowing, pass, and per-type
   threshold benchmark without lockbox tuning.
 
+### 8I.4 NER-2 controlled experiment infrastructure
+
+NER-2 infrastructure now separates unfiltered window/pass proposals from
+selection thresholds. Proposal caches retain raw model score, label wording,
+pass, window, section, and exact evidence provenance. Model and tokenizer loading
+is lazy and occurs only after a proposal-cache miss. The immutable
+`configs/gliner_zero_shot.yaml` NER-1 reproduction config was not modified.
+
+Implemented controlled profiles include legacy NER-1 chunks, line/bullet units,
+section windows without overlap, and section windows with token overlap. The
+registry validates unique run IDs, parent graphs, and one declared experiment
+axis. Development/calibration/lockbox guards, density/runtime reports,
+extraction-only and end-to-end evaluation, coordinate threshold generation,
+focused-pass provenance, deterministic byte verification, and residual error
+handoff scripts are present.
+
+The real offline GLiNER proposal-floor equivalence gate passed on all 12
+development notes: 426 window/pass comparisons, zero mismatches between direct
+threshold 0.35 inference and threshold 0.15 proposals filtered at 0.35. Raw
+proposal reuse is therefore permitted for NER-2 threshold sweeps. Lockbox was not
+opened.
+
+Controlled development results selected descriptive English labels and
+section-aware windows without overlap. The selected global threshold is `0.30`:
+exact F1 increased from the section-window threshold-0.35 reference `0.272527`
+to `0.280992`, with density ratio `1.360976` and no per-type regression beyond
+the frozen budget. The first threshold-floor run took 82.07 seconds; cached
+threshold selections took approximately 0.82--1.41 seconds and did not reload
+the model.
+
+Per-type coordinate candidates for diagnosis, drug, and test result produced
+overall exact-F1 gains of `0.001708`, `0.000582`, and `0.004141`; all were below
+the frozen minimum useful effect `0.005`, so the global profile was retained.
+The problem-focused pass exceeded the density budget (`1.521951 > 1.50`). The
+structured-focused pass improved development exact F1 by only `0.003008`, below
+the minimum useful effect. P3 was therefore not run. Calibration confirmed a
+structured-pass signal, but it was not promoted because the required development
+gate had failed.
+
+The frozen NER-2 configuration is `configs/ner2/selected_zero_shot.yaml`:
+English full pass, section windows without overlap, and global threshold `0.30`.
+Two cached offline calibration reruns produced 4/4 byte-identical prediction
+files. The selected residual review covers all five types and was handed off in
+`data/golden/DATA_REQUESTS_V1.md`. No lockbox note was opened or evaluated.
+
 ---
 
 ## 9. Practical continuation checklist

@@ -1,0 +1,31 @@
+version: ner2-selection-v1
+primary_metric: exact_f1
+secondary_metrics:
+  - relaxed_f1
+  - text_score
+  - mean_entities_per_note
+technical_gates:
+  validation_errors: 0
+  offset_errors: 0
+  schema_errors: 0
+  exact_duplicate_warnings: 0
+regression_budget:
+  per_type_exact_f1_absolute: 0.03
+  relaxed_f1_absolute: 0.01
+  density_ratio_max: 1.50
+minimum_useful_effect:
+  overall_exact_f1_absolute: 0.005
+  target_type_exact_f1_absolute: 0.01
+  end_to_end_final_score_absolute: 0.002
+resources:
+  max_cpu_seconds_per_note: 45
+lockbox:
+  allow_for_selection: false
+  open_milestones: [M3, M6]
+  allowed_purposes: [milestone_evaluation, final_evaluation]
+calibration:
+  shortlist_size: 3
+  require_explicit_shortlist: true
+  allowed_purposes: [threshold_selection, calibration, evaluation]
+development:
+  allowed_purposes: [selection, tuning, evaluation, diagnostics]

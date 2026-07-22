@@ -25,6 +25,8 @@ def test_optional_missing_backend_returns_empty() -> None:
     assert backend.predict("sốt", ["symptom"], threshold=0.35) == []
 
 
-def test_required_missing_local_model_fails_fast(tmp_path) -> None:
+def test_required_missing_local_model_is_validated_on_inference(tmp_path) -> None:
+    backend = GLiNERBackend({"required": True, "model_name_or_path": str(tmp_path / "missing")})
+    assert backend.load_count == 0
     with pytest.raises((FileNotFoundError, RuntimeError)):
-        GLiNERBackend({"required": True, "model_name_or_path": str(tmp_path / "missing")})
+        backend.predict("sốt", ["symptom"], threshold=0.15)

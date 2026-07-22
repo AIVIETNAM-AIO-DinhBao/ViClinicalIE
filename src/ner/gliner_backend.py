@@ -15,7 +15,7 @@ class GLiNERPrediction:
 
 
 class GLiNERModelProtocol(Protocol):
-    def predict_entities(self, text: str, labels: list[str], *, threshold: float) -> list[dict[str, Any]]: ...
+    def predict_entities(self, text: str, labels: list[str], *, threshold: float, **kwargs: Any) -> list[dict[str, Any]]: ...
 
 
 class GLiNERBackend:
@@ -31,23 +31,33 @@ class GLiNERBackend:
         self.model: GLiNERModelProtocol | None = model
         self.error: str | None = None
         self.load_count = int(model is not None)
-        if self.model is None:
+        self.lazy_load = bool(self.config.get("lazy_load", True))
+        if self.model is None and not self.lazy_load:
             self._load_model()
 
     @property
     def available(self) -> bool:
         return self.model is not None
 
-    def predict(self, text: str, labels: list[str], *, threshold: float) -> list[GLiNERPrediction]:
+    def predict(
+        self,
+        text: str,
+        labels: list[str],
+        *,
+        threshold: float,
+        inference_options: Mapping[str, Any] | None = None,
+    ) -> list[GLiNERPrediction]:
         if not text:
             return []
+        if self.model is None and self.error is None:
+            self._load_model()
         if self.model is None:
             message = self.error or "GLiNER model is unavailable"
             if self.required:
                 raise RuntimeError(message)
             return []
         try:
-            rows = self.model.predict_entities(text, labels, threshold=float(threshold))
+            rows = self.model.predict_entities(text, labels, threshold=float(threshold), **dict(inference_options or {}))
         except Exception as exc:
             raise RuntimeError(f"GLiNER inference failed: {exc}") from exc
         predictions: list[GLiNERPrediction] = []
@@ -67,13 +77,17 @@ class GLiNERBackend:
         }
 
     def _load_model(self) -> None:
-        model_path = Path(self.model_name_or_path)
-        if model_path.is_absolute() or model_path.parts[:1] == ("models",):
-            if not model_path.exists():
-                self.error = f"GLiNER model path does not exist: {model_path}"
-                if self.required:
-                    raise FileNotFoundError(self.error)
-                return
+        if self.model is not None:
+            return
+        if self.error:
+            if self.required:
+                raise RuntimeError(self.error)
+            return
+        self._validate_explicit_local_path()
+        if self.error:
+            if self.required:
+                raise FileNotFoundError(self.error)
+            return
         try:
             from gliner import GLiNER  # type: ignore
         except Exception as exc:
@@ -81,6 +95,7 @@ class GLiNERBackend:
             if self.required:
                 raise RuntimeError(self.error) from exc
             return
+
         kwargs: dict[str, Any] = {}
         if self.model_revision:
             kwargs["revision"] = str(self.model_revision)
@@ -99,6 +114,13 @@ class GLiNERBackend:
             self.error = f"Could not load GLiNER model {self.model_name_or_path}: {exc}"
             if self.required:
                 raise RuntimeError(self.error) from exc
+
+    def _validate_explicit_local_path(self) -> None:
+        model_path = Path(self.model_name_or_path)
+        if (model_path.is_absolute() or model_path.parts[:1] == ("models",)) and not model_path.exists():
+            self.error = f"GLiNER model path does not exist: {model_path}"
+            if self.required:
+                raise FileNotFoundError(self.error)
 
 
 def _parse_prediction(row: Any, text: str) -> GLiNERPrediction | None:

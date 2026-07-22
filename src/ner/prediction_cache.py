@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-CACHE_SCHEMA_VERSION = "1"
+CACHE_SCHEMA_VERSION = "ner1-predictions-v3"
 
 
 def build_cache_key(payload: Mapping[str, Any]) -> str:

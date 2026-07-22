@@ -1,0 +1,180 @@
+version: ner2-v1
+base_config: ../gliner_zero_shot.yaml
+axis_paths:
+  labels: extractors.gliner.label_map
+  windows: extractors.gliner.windowing
+  thresholds: extractors.gliner.threshold
+  passes: extractors.gliner.passes
+
+label_maps:
+  english: &label_english
+    symptom: TRIỆU_CHỨNG
+    disease or diagnosis: CHẨN_ĐOÁN
+    medication or drug: THUỐC
+    medical test or lab name: TÊN_XÉT_NGHIỆM
+    test result or measurement value: KẾT_QUẢ_XÉT_NGHIỆM
+  vietnamese: &label_vietnamese
+    triệu chứng: TRIỆU_CHỨNG
+    bệnh hoặc chẩn đoán: CHẨN_ĐOÁN
+    thuốc hoặc dược phẩm: THUỐC
+    tên xét nghiệm y khoa: TÊN_XÉT_NGHIỆM
+    kết quả xét nghiệm hoặc giá trị đo: KẾT_QUẢ_XÉT_NGHIỆM
+  bilingual: &label_bilingual
+    symptom | triệu chứng: TRIỆU_CHỨNG
+    disease or diagnosis | bệnh hoặc chẩn đoán: CHẨN_ĐOÁN
+    medication or drug | thuốc hoặc dược phẩm: THUỐC
+    medical test or lab name | tên xét nghiệm y khoa: TÊN_XÉT_NGHIỆM
+    test result or measurement value | kết quả xét nghiệm hoặc giá trị đo: KẾT_QUẢ_XÉT_NGHIỆM
+  short: &label_short
+    symptom: TRIỆU_CHỨNG
+    diagnosis: CHẨN_ĐOÁN
+    drug: THUỐC
+    test: TÊN_XÉT_NGHIỆM
+    result: KẾT_QUẢ_XÉT_NGHIỆM
+
+families:
+  labels:
+    - run_id: label_en
+      hypothesis: Descriptive English reproduces the Training Session baseline.
+      primary_change: label_schema=english
+      overrides:
+        extractors:
+          gliner:
+            label_map: *label_english
+    - run_id: label_vi
+      parent_run_id: label_en
+      hypothesis: Vietnamese prompts improve task-language alignment.
+      primary_change: label_schema=vietnamese
+      overrides:
+        extractors:
+          gliner:
+            label_map: *label_vietnamese
+    - run_id: label_bilingual
+      parent_run_id: label_en
+      hypothesis: Bilingual prompts retain multilingual semantics while adding Vietnamese task cues.
+      primary_change: label_schema=bilingual
+      overrides:
+        extractors:
+          gliner:
+            label_map: *label_bilingual
+    - run_id: label_short
+      parent_run_id: label_en
+      hypothesis: Short labels reduce prompt competition.
+      primary_change: label_schema=short
+      overrides:
+        extractors:
+          gliner:
+            label_map: *label_short
+  windows:
+    - run_id: window_line
+      hypothesis: Existing line/bullet units provide a high-precision structural baseline.
+      primary_change: window_strategy=line_bullet
+      overrides:
+        extractors:
+          gliner:
+            windowing:
+              strategy: line_bullet
+              overlap_tokens: 0
+    - run_id: window_section_no_overlap
+      parent_run_id: window_line
+      hypothesis: Section-packed windows add context without duplicate overlap proposals.
+      primary_change: window_strategy=section,overlap=0
+      overrides:
+        extractors:
+          gliner:
+            windowing:
+              strategy: section_no_overlap
+              overlap_tokens: 0
+    - run_id: window_section_overlap
+      parent_run_id: window_section_no_overlap
+      hypothesis: Section-packed overlapping windows recover boundary entities.
+      primary_change: window_strategy=section,overlap=64
+      overrides:
+        extractors:
+          gliner:
+            windowing:
+              strategy: section_overlap
+              overlap_tokens: 64
+  thresholds:
+    - {run_id: threshold_020, hypothesis: Lower threshold improves recall, primary_change: threshold=0.20, overrides: {extractors: {gliner: {threshold: {default: 0.20}}}}}
+    - {run_id: threshold_025, parent_run_id: threshold_020, hypothesis: Threshold survey, primary_change: threshold=0.25, overrides: {extractors: {gliner: {threshold: {default: 0.25}}}}}
+    - {run_id: threshold_030, parent_run_id: threshold_025, hypothesis: Threshold survey, primary_change: threshold=0.30, overrides: {extractors: {gliner: {threshold: {default: 0.30}}}}}
+    - {run_id: threshold_035, parent_run_id: threshold_030, hypothesis: NER-1 reference threshold, primary_change: threshold=0.35, overrides: {extractors: {gliner: {threshold: {default: 0.35}}}}}
+    - {run_id: threshold_040, parent_run_id: threshold_035, hypothesis: Threshold survey, primary_change: threshold=0.40, overrides: {extractors: {gliner: {threshold: {default: 0.40}}}}}
+    - {run_id: threshold_045, parent_run_id: threshold_040, hypothesis: Threshold survey, primary_change: threshold=0.45, overrides: {extractors: {gliner: {threshold: {default: 0.45}}}}}
+    - {run_id: threshold_050, parent_run_id: threshold_045, hypothesis: Threshold survey, primary_change: threshold=0.50, overrides: {extractors: {gliner: {threshold: {default: 0.50}}}}}
+    - {run_id: threshold_060, parent_run_id: threshold_050, hypothesis: Higher threshold improves precision, primary_change: threshold=0.60, overrides: {extractors: {gliner: {threshold: {default: 0.60}}}}}
+    - run_id: coord_diagnosis_045
+      parent_run_id: threshold_030
+      hypothesis: Raising only diagnosis threshold improves diagnosis precision without losing useful recall.
+      primary_change: threshold.CHẨN_ĐOÁN=0.45
+      overrides: {extractors: {gliner: {threshold: {CHẨN_ĐOÁN: 0.45}}}}
+    - run_id: coord_drug_045
+      parent_run_id: threshold_030
+      hypothesis: Raising only drug threshold removes low-confidence drug false positives.
+      primary_change: threshold.THUỐC=0.45
+      overrides: {extractors: {gliner: {threshold: {THUỐC: 0.45}}}}
+    - run_id: coord_result_025
+      parent_run_id: threshold_030
+      hypothesis: Lowering only result threshold recovers sparse test-result mentions.
+      primary_change: threshold.KẾT_QUẢ_XÉT_NGHIỆM=0.25
+      overrides: {extractors: {gliner: {threshold: {KẾT_QUẢ_XÉT_NGHIỆM: 0.25}}}}
+  passes:
+    - run_id: pass_full
+      hypothesis: Full five-label pass is the committed baseline.
+      primary_change: passes=full
+      overrides:
+        extractors:
+          gliner:
+            passes:
+              - name: full_five_type
+                label_map: *label_english
+    - run_id: pass_full_problem
+      parent_run_id: pass_full
+      hypothesis: A focused problem pass reduces symptom/diagnosis label competition.
+      primary_change: passes=full+problem
+      overrides:
+        extractors:
+          gliner:
+            passes:
+              - name: full_five_type
+                label_map: *label_english
+              - name: problem_focused
+                label_map:
+                  symptom: TRIỆU_CHỨNG
+                  disease or diagnosis: CHẨN_ĐOÁN
+    - run_id: pass_full_structured
+      parent_run_id: pass_full
+      hypothesis: A focused structured pass improves drug/test/result extraction.
+      primary_change: passes=full+structured
+      overrides:
+        extractors:
+          gliner:
+            passes:
+              - name: full_five_type
+                label_map: *label_english
+              - name: structured_focused
+                label_map:
+                  medication or drug: THUỐC
+                  medical test or lab name: TÊN_XÉT_NGHIỆM
+                  test result or measurement value: KẾT_QUẢ_XÉT_NGHIỆM
+    - run_id: pass_full_problem_structured
+      parent_run_id: pass_full
+      hypothesis: Both focused passes provide complementary gains after at least one focused pass is accepted.
+      primary_change: passes=full+problem+structured
+      condition: pass_full_problem_or_structured_accepted
+      overrides:
+        extractors:
+          gliner:
+            passes:
+              - name: full_five_type
+                label_map: *label_english
+              - name: problem_focused
+                label_map:
+                  symptom: TRIỆU_CHỨNG
+                  disease or diagnosis: CHẨN_ĐOÁN
+              - name: structured_focused
+                label_map:
+                  medication or drug: THUỐC
+                  medical test or lab name: TÊN_XÉT_NGHIỆM
+                  test result or measurement value: KẾT_QUẢ_XÉT_NGHIỆM
